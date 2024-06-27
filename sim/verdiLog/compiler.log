@@ -1,0 +1,46 @@
+*design* DebussyLib (btIdent Verdi_O-2018.09-SP2)
+Command arguments:
+    +define+verilog
+    +v2k
+    -sverilog
+    -f flist.f
+        ../rtl/cpu/define.v
+        ../tb/tb_ooocpu.v
+        ../rtl/spm.v
+        ../rtl/sii_sync.v
+        ../rtl/sii_pos.v
+        ../rtl/ahb_bus_decoder.v
+        ../rtl/cpu/decoder.v
+        ../rtl/cpu/fu_br.v
+        ../rtl/cpu/gpr.v
+        ../rtl/cpu/issue_queue_InO.v
+        ../rtl/cpu/mul_booth_radix_4.v
+        ../rtl/cpu/ooocpu.v
+        ../rtl/cpu/rob.v
+        ../rtl/cpu/ahb_mem_ctrl.v
+        ../rtl/cpu/fu_div.v
+        ../rtl/cpu/id_reg.v
+        ../rtl/cpu/issue_queue_OoO_MD.v
+        ../rtl/cpu/mul_csa.v
+        ../rtl/cpu/pc.v
+        ../rtl/cpu/alu.v
+        ../rtl/cpu/div_find_ones.v
+        ../rtl/cpu/fu_mul.v
+        ../rtl/cpu/if_reg.v
+        ../rtl/cpu/issue_queue_OoO.v
+        ../rtl/cpu/mul.v
+        ../rtl/cpu/cpu_ctrl.v
+        ../rtl/cpu/div.v
+        ../rtl/cpu/fu_top.v
+        ../rtl/cpu/issue_queue_ctrl.v
+        ../rtl/cpu/mem_ctrl.v
+        ../rtl/cpu/mul_wallace.v
+        ../rtl/cpu/rat.v
+
+Highest level modules:
+tb_ooocpu
+sii_sync
+sii_pos
+ahb_bus_decoder
+
+Total	0 error(s),   0 warning(s)

@@ -1,0 +1,92 @@
+{
+    "ooocpu": [
+        "ooocpu",
+        "h3EGz",
+        "module",
+        2
+    ],
+    "issue_queue_InO_0000": [
+        "issue_queue_InO_0000",
+        "F2543",
+        "module",
+        10
+    ],
+    "std": [
+        "std",
+        "reYIK",
+        "module",
+        1
+    ],
+    "mul_csa": [
+        "mul_csa",
+        "NchRM",
+        "module",
+        4
+    ],
+    "tb_ooocpu": [
+        "tb_ooocpu",
+        "HM6Si",
+        "module",
+        12
+    ],
+    "sii_sync": [
+        "sii_sync",
+        "Vmcef",
+        "module",
+        13
+    ],
+    "id_reg": [
+        "id_reg",
+        "qn2tv",
+        "module",
+        3
+    ],
+    "sii_pos": [
+        "sii_pos",
+        "tjpxB",
+        "module",
+        14
+    ],
+    "ahb_bus_decoder": [
+        "ahb_bus_decoder",
+        "cNNTf",
+        "module",
+        15
+    ],
+    "gpr_0000": [
+        "gpr_0000",
+        "VqmQe",
+        "module",
+        9
+    ],
+    "decoder": [
+        "decoder",
+        "zf0bY",
+        "module",
+        8
+    ],
+    "cpu_ctrl": [
+        "cpu_ctrl",
+        "px7MH",
+        "module",
+        6
+    ],
+    "issue_queue_ctrl": [
+        "issue_queue_ctrl",
+        "ZdEM4",
+        "module",
+        7
+    ],
+    "rat_0000": [
+        "rat_0000",
+        "DxFvz",
+        "module",
+        5
+    ],
+    "...MASTER...": [
+        "SIM",
+        "amcQw",
+        "module",
+        11
+    ]
+}

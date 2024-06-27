@@ -1,0 +1,222 @@
+debImport "+v2k" "-sverilog" "-f" "flist.f"
+debLoadSimResult /home/ICer/siicpu/OoOcpu/sim/wave_ooocpu.fsdb
+wvCreateWindow
+schCreateWindow -delim "." -win $_nSchema1 -scope "tb_ooocpu"
+schZoomOut -win $_nSchema3 -pos 1423762 2912746
+schZoomOut -win $_nSchema3 -pos 1423762 2912746
+schZoomOut -win $_nSchema3 -pos 1379926 2912746
+schZoomOut -win $_nSchema3 -pos 1379926 2912747
+schZoomOut -win $_nSchema3 -pos 1379925 2912746
+schZoomOut -win $_nSchema3 -pos 1379924 2912745
+schZoomOut -win $_nSchema3 -pos 1379924 2912745
+schZoomOut -win $_nSchema3 -pos 1379924 2912744
+schZoomIn -win $_nSchema3 -pos 1379924 2912744
+schZoomIn -win $_nSchema3 -pos 1379924 2912744
+schZoomIn -win $_nSchema3 -pos 1379924 2912744
+schZoomIn -win $_nSchema3 -pos 1379924 2912744
+schZoomIn -win $_nSchema3 -pos 1379925 2912743
+schZoomIn -win $_nSchema3 -pos 1379924 2912743
+schZoomIn -win $_nSchema3 -pos 144801 2868100
+schZoomIn -win $_nSchema3 -pos 144800 2868099
+schZoomIn -win $_nSchema3 -pos 144800 2868099
+schZoomIn -win $_nSchema3 -pos 144800 2868099
+schZoomIn -win $_nSchema3 -pos 144800 2868098
+schZoomIn -win $_nSchema3 -pos 144799 2868098
+schZoomIn -win $_nSchema3 -pos 144800 2868098
+schZoomIn -win $_nSchema3 -pos 45481 2868097
+schZoomIn -win $_nSchema3 -pos 43991 2868097
+schZoomIn -win $_nSchema3 -pos 43991 2868097
+schZoomIn -win $_nSchema3 -pos 43991 2868097
+schZoomIn -win $_nSchema3 -pos 43990 2868097
+schZoomIn -win $_nSchema3 -pos 43990 2868097
+schZoomIn -win $_nSchema3 -pos 43990 2868096
+schZoomIn -win $_nSchema3 -pos 18004 2875254
+schZoomIn -win $_nSchema3 -pos 18004 2875254
+schZoomIn -win $_nSchema3 -pos 18003 2875253
+schZoomIn -win $_nSchema3 -pos 18003 2875253
+schZoomIn -win $_nSchema3 -pos 18002 2875253
+schZoomIn -win $_nSchema3 -pos 18002 2875252
+schZoomIn -win $_nSchema3 -pos 18002 2875252
+schZoomOut -win $_nSchema3 -pos 21825 6437275
+schZoomOut -win $_nSchema3 -pos 21825 6437275
+schZoomOut -win $_nSchema3 -pos 21825 6437275
+schZoomOut -win $_nSchema3 -pos 21825 6437275
+schZoomOut -win $_nSchema3 -pos 21825 6437275
+schZoomOut -win $_nSchema3 -pos 21825 6437275
+schZoomOut -win $_nSchema3 -pos 21825 6437275
+schZoomOut -win $_nSchema3 -pos 21825 6437275
+schZoomOut -win $_nSchema3 -pos 21789 6437275
+schZoomOut -win $_nSchema3 -pos 23276 6437240
+schZoomOut -win $_nSchema3 -pos 23276 6437205
+schZoomOut -win $_nSchema3 -pos 23276 6437205
+schZoomOut -win $_nSchema3 -pos 23276 6437205
+schZoomOut -win $_nSchema3 -pos 23276 6437205
+schZoomOut -win $_nSchema3 -pos 23276 6437205
+schZoomOut -win $_nSchema3 -pos 23276 6437205
+schZoomOut -win $_nSchema3 -pos 23276 6437205
+schZoomOut -win $_nSchema3 -pos 23276 6437205
+schZoomOut -win $_nSchema3 -pos 23276 6437205
+schZoomOut -win $_nSchema3 -pos 23276 6437205
+schZoomOut -win $_nSchema3 -pos 23276 6437205
+schZoomOut -win $_nSchema3 -pos 23276 6437205
+schZoomOut -win $_nSchema3 -pos 23276 6437205
+schZoomOut -win $_nSchema3 -pos 23276 6437205
+schZoomOut -win $_nSchema3 -pos 23276 6437205
+schZoomOut -win $_nSchema3 -pos 23134 6436957
+schZoomOut -win $_nSchema3 -pos 23028 6436851
+schZoomOut -win $_nSchema3 -pos 23028 6436851
+schZoomOut -win $_nSchema3 -pos 23028 6436851
+schZoomOut -win $_nSchema3 -pos 23028 6436851
+schZoomOut -win $_nSchema3 -pos 23028 6436780
+schZoomOut -win $_nSchema3 -pos 23028 6436780
+schZoomOut -win $_nSchema3 -pos 22993 6436744
+schZoomOut -win $_nSchema3 -pos 22922 6436744
+schZoomOut -win $_nSchema3 -pos 22922 6436744
+schZoomOut -win $_nSchema3 -pos 22922 6436744
+schZoomOut -win $_nSchema3 -pos 22922 6436744
+schZoomOut -win $_nSchema3 -pos 22922 6436744
+schZoomOut -win $_nSchema3 -pos 22922 6436744
+schZoomOut -win $_nSchema3 -pos 22922 6436744
+schZoomOut -win $_nSchema3 -pos 22922 6436744
+schZoomOut -win $_nSchema3 -pos 22887 6436709
+schZoomOut -win $_nSchema3 -pos 31842 6432816
+schZoomOut -win $_nSchema3 -pos 31842 6432816
+schZoomOut -win $_nSchema3 -pos 31842 6432816
+schZoomOut -win $_nSchema3 -pos 31842 6432816
+schZoomOut -win $_nSchema3 -pos 31842 6432816
+schZoomOut -win $_nSchema3 -pos 31842 6432816
+schZoomOut -win $_nSchema3 -pos 31842 6432816
+schZoomOut -win $_nSchema3 -pos 31700 6432957
+schZoomOut -win $_nSchema3 -pos 31629 6433064
+schZoomIn -win $_nSchema3
+schZoomIn -win $_nSchema3
+schZoomIn -win $_nSchema3
+schZoomIn -win $_nSchema3
+schZoomOut -win $_nSchema3
+schZoomOut -win $_nSchema3
+schZoomOut -win $_nSchema3
+schZoomOut -win $_nSchema3
+schZoomOut -win $_nSchema3
+schZoomOut -win $_nSchema3
+schCloseWindow -win $_nSchema3
+srcDeselectAll -win $_nTrace1
+srcHBSelect "tb_ooocpu.u_ooocpu" -win $_nTrace1
+srcSetScope -win $_nTrace1 "tb_ooocpu.u_ooocpu" -delim "."
+srcHBSelect "tb_ooocpu.u_ooocpu" -win $_nTrace1
+schCreateWindow -delim "." -win $_nSchema1 -scope "tb_ooocpu.u_ooocpu"
+verdiDockWidgetSetCurTab -dock widgetDock_MTB_SOURCE_TAB_1
+srcDeselectAll -win $_nTrace1
+srcDeselectAll -win $_nTrace1
+srcSelect -signal "clk" -line 4 -pos 1 -win $_nTrace1
+srcAddSelectedToWave -clipboard -win $_nTrace1
+wvDrop -win $_nWave2
+wvSetCursor -win $_nWave2 119993.885347 -snap {("G2" 0)}
+wvZoomOut -win $_nWave2
+wvZoomOut -win $_nWave2
+wvZoomOut -win $_nWave2
+wvZoomOut -win $_nWave2
+wvZoomOut -win $_nWave2
+wvZoomOut -win $_nWave2
+wvZoomOut -win $_nWave2
+wvZoomOut -win $_nWave2
+wvZoomOut -win $_nWave2
+wvZoomOut -win $_nWave2
+wvZoomOut -win $_nWave2
+srcDeselectAll -win $_nTrace1
+srcSelect -signal "rst_n" -line 5 -pos 1 -win $_nTrace1
+srcAddSelectedToWave -clipboard -win $_nTrace1
+wvDrop -win $_nWave2
+srcDeselectAll -win $_nTrace1
+srcSelect -signal "cpu_en" -line 6 -pos 1 -win $_nTrace1
+srcAddSelectedToWave -clipboard -win $_nTrace1
+wvDrop -win $_nWave2
+srcDeselectAll -win $_nTrace1
+srcDeselectAll -win $_nTrace1
+srcSelect -signal "irq_external" -line 8 -pos 1 -win $_nTrace1
+srcDeselectAll -win $_nTrace1
+srcDeselectAll -win $_nTrace1
+srcSelect -signal "insn" -line 12 -pos 1 -win $_nTrace1
+srcAddSelectedToWave -clipboard -win $_nTrace1
+wvDrop -win $_nWave2
+wvZoom -win $_nWave2 0.000000 25678.833967
+wvSetCursor -win $_nWave2 4968.697067 -snap {("G1" 4)}
+wvSelectGroup -win $_nWave2 {G2}
+wvSelectSignal -win $_nWave2 {( "G1" 4 )} 
+srcDeselectAll -win $_nTrace1
+srcSelect -signal "rd_insn_en" -line 13 -pos 1 -win $_nTrace1
+srcDeselectAll -win $_nTrace1
+srcDeselectAll -win $_nTrace1
+srcSelect -signal "pc" -line 14 -pos 1 -win $_nTrace1
+srcAddSelectedToWave -clipboard -win $_nTrace1
+wvDrop -win $_nWave2
+srcDeselectAll -win $_nTrace1
+wvSetCursor -win $_nWave2 4664.933927 -snap {("G2" 0)}
+wvSetCursor -win $_nWave2 5012.091801 -snap {("G1" 1)}
+srcHBSelect "tb_ooocpu.u_ooocpu.u_pc" -win $_nTrace1
+srcSetScope -win $_nTrace1 "tb_ooocpu.u_ooocpu.u_pc" -delim "."
+srcHBSelect "tb_ooocpu.u_ooocpu.u_pc" -win $_nTrace1
+srcDeselectAll -win $_nTrace1
+srcDeselectAll -win $_nTrace1
+srcSelect -signal "trap_happened" -line 23 -pos 1 -win $_nTrace1
+srcAddSelectedToWave -clipboard -win $_nTrace1
+wvDrop -win $_nWave2
+srcDeselectAll -win $_nTrace1
+srcSelect -signal "mret_en" -line 23 -pos 1 -win $_nTrace1
+srcAddSelectedToWave -clipboard -win $_nTrace1
+wvDrop -win $_nWave2
+wvSetCursor -win $_nWave2 759.407849 -snap {("G1" 5)}
+wvSetCursor -win $_nWave2 12790.597908 -snap {("G1" 5)}
+srcActiveTrace "tb_ooocpu.u_ooocpu.pc\[31:0\]" -win $_nTrace1 -TraceByDConWave \
+           -TraceTime 0 -TraceValue 00000000000000000000000000000000
+wvSetCursor -win $_nWave2 12801.446591 -snap {("G1" 5)}
+wvZoomOut -win $_nWave2
+wvZoomOut -win $_nWave2
+wvZoomOut -win $_nWave2
+wvZoomOut -win $_nWave2
+wvSelectSignal -win $_nWave2 {( "G1" 6 )} 
+srcDeselectAll -win $_nTrace1
+srcSelect -signal "trap_happened" -line 23 -pos 1 -win $_nTrace1
+srcDeselectAll -win $_nTrace1
+srcSelect -signal "br_taken" -line 25 -pos 1 -win $_nTrace1
+srcAddSelectedToWave -clipboard -win $_nTrace1
+wvDrop -win $_nWave2
+srcDeselectAll -win $_nTrace1
+srcSelect -signal "pc_stall" -line 25 -pos 1 -win $_nTrace1
+srcAddSelectedToWave -clipboard -win $_nTrace1
+wvDrop -win $_nWave2
+srcDeselectAll -win $_nTrace1
+srcSelect -signal "pc_stall" -line 25 -pos 1 -win $_nTrace1
+srcAction -pos 24 13 5 -win $_nTrace1 -name "pc_stall" -ctrlKey off
+srcDeselectAll -win $_nTrace1
+srcSelect -signal "rob_full" -line 19 -pos 1 -win $_nTrace1
+srcAddSelectedToWave -clipboard -win $_nTrace1
+wvDrop -win $_nWave2
+srcDeselectAll -win $_nTrace1
+srcSelect -signal "stall_in_issue" -line 19 -pos 1 -win $_nTrace1
+srcAddSelectedToWave -clipboard -win $_nTrace1
+wvDrop -win $_nWave2
+srcDeselectAll -win $_nTrace1
+srcSelect -signal "stall_in_decoder" -line 19 -pos 1 -win $_nTrace1
+srcAddSelectedToWave -clipboard -win $_nTrace1
+wvDrop -win $_nWave2
+srcDeselectAll -win $_nTrace1
+srcSelect -signal "rob_full" -line 19 -pos 1 -win $_nTrace1
+srcAction -pos 18 6 7 -win $_nTrace1 -name "rob_full" -ctrlKey off
+srcDeselectAll -win $_nTrace1
+srcSelect -signal "wptr" -line 121 -pos 1 -win $_nTrace1
+srcAddSelectedToWave -clipboard -win $_nTrace1
+wvDrop -win $_nWave2
+srcDeselectAll -win $_nTrace1
+srcSelect -signal "rptr" -line 121 -pos 1 -win $_nTrace1
+srcAddSelectedToWave -clipboard -win $_nTrace1
+wvDrop -win $_nWave2
+srcDeselectAll -win $_nTrace1
+srcSelect -signal "wptr" -line 122 -pos 1 -win $_nTrace1
+srcAddSelectedToWave -clipboard -win $_nTrace1
+wvDrop -win $_nWave2
+srcDeselectAll -win $_nTrace1
+srcSelect -signal "rptr" -line 122 -pos 1 -win $_nTrace1
+srcAddSelectedToWave -clipboard -win $_nTrace1
+wvDrop -win $_nWave2
+srcDeselectAll -win $_nTrace1
+srcSelect -signal "rptr" -line 121 -pos 1 -win $_nTrace1
