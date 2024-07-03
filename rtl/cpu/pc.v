@@ -22,9 +22,9 @@ always @(posedge clk or negedge rst_n) begin
     end else if (cpu_en) begin
         if (trap_happened || mret_en) begin
             pc <= ctrl_pc;
-        end else if (br_taken && !pc_stall) begin
+        end else if (br_taken) begin
             pc <= br_addr;
-        end else if (jp_taken && !pc_stall) begin
+        end else if (jp_taken) begin
             pc <= jp_addr;
         end else if (!pc_stall) begin
             pc <= pc + 4;

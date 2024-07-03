@@ -240,7 +240,7 @@ GDMSESSION=gnome-classic
 SPECMAN_HOME=/home/cadence/INCISIVE152/components/sn
 HISTCONTROL=ignoredups
 VCS_ARG_ADDED_FOR_TMP=1
-SNPS_VCS_TMPDIR=/tmp/vcs_20240626163857_109443
+SNPS_VCS_TMPDIR=/tmp/vcs_20240703075701_84452
 SHLVL=3
 RISCV=/home/Riscv_Tools
 XDG_SEAT=seat0
@@ -279,7 +279,6 @@ LC_TIME=zh_CN.UTF-8
 COLORTERM=truecolor
 XAUTHORITY=/run/gdm/auth-for-ICer-Gerk2C/database
 _=./simv
-OLDPWD=/home/ICer/siicpu/OoOcpu/sim/simv.daidir/debug_dump/fsearch
 VCS_HEAP_EXEC=true
 VCS_PATHMAP_PRELOAD_DONE=1
 VCS_EXEC_DONE=1
@@ -289,86 +288,86 @@ Runtime command line arguments:
 argv[0]=simv
 argv[1]=+vc
 argv[2]=+v2k
-291 profile - 100
-          CPU/Mem usage: 0.030 sys,  0.120 user,  247.97M mem
-292 Thu Jun 27 00:38:59 2024
-293 pliAppInit
-294 FSDB_GATE is set.
-295 FSDB_RTL is set.
-296 Enable Parallel Dumping.
-297 pliAppMiscSet: New Sim Round
-298 pliEntryInit
-299 LIBSSCORE=found /home/synopsys/verdi/Verdi_O-2018.09-SP2/share/PLI/lib/LINUXAMD64/libsscore_vcs201809.so through $NOVAS_HOME setting.
-300 FSDB Dumper for VCS, Release Verdi_O-2018.09-SP2, Linux x86_64/64bit, 02/21/2019
-301 (C) 1996 - 2019 by Synopsys, Inc.
-302 sps_call_fsdbDumpfile_main at 0 : ../tb/tb_ooocpu.v(126)
-303 argv[0]: (wave_ooocpu.fsdb)
-304 *Verdi* FSDB WARNING: The FSDB file already exists. Overwriting the FSDB file may crash the programs that are using this file.
-305 *Verdi* : Create FSDB file 'wave_ooocpu.fsdb'
-306 compile option from '/home/ICer/siicpu/OoOcpu/sim/simv.daidir/vcs_rebuild'.
-307   "vcs '-f' 'flist.f' '-LDFLAGS' '-Wl,--no-as-needed' '-timescale=1ns/1ps' '-fsdb' '-full64' '-R' '+vc' '+v2k' '-sverilog' '-debug_all' 2>&1"
-308 FSDB_VCS_ENABLE_FAST_VC is enable
-309 sps_call_fsdbDumpvars_vd_main at 0 : ../tb/tb_ooocpu.v(127)
-310 [spi_vcs_vd_ppi_create_root]: no upf option
-311 FSDB dumper cannot dump UPF related power signal ($power_tree): no ppiPowerNetwork.
-312 *Verdi* : Begin traversing the scopes, layer (0).
-313 *Verdi* : End of traversing.
-314 pliAppHDL_DumpVarComplete traverse var: profile - 
-          CPU/Mem usage: 0.050 sys,  0.140 user,  344.47M mem
-                   incr: 0.010 sys,  0.010 user,  8.94M mem
-                   accu: 0.010 sys,  0.010 user,  8.94M mem
-              accu incr: 0.010 sys,  0.010 user,  8.94M mem
+290 profile - 100
+          CPU/Mem usage: 0.050 sys,  0.110 user,  248.03M mem
+291 Wed Jul  3 15:57:02 2024
+292 pliAppInit
+293 FSDB_GATE is set.
+294 FSDB_RTL is set.
+295 Enable Parallel Dumping.
+296 pliAppMiscSet: New Sim Round
+297 pliEntryInit
+298 LIBSSCORE=found /home/synopsys/verdi/Verdi_O-2018.09-SP2/share/PLI/lib/LINUXAMD64/libsscore_vcs201809.so through $NOVAS_HOME setting.
+299 FSDB Dumper for VCS, Release Verdi_O-2018.09-SP2, Linux x86_64/64bit, 02/21/2019
+300 (C) 1996 - 2019 by Synopsys, Inc.
+301 sps_call_fsdbDumpfile_main at 0 : ../tb/tb_ooocpu.v(126)
+302 argv[0]: (wave_ooocpu.fsdb)
+303 *Verdi* FSDB WARNING: The FSDB file already exists. Overwriting the FSDB file may crash the programs that are using this file.
+304 *Verdi* : Create FSDB file 'wave_ooocpu.fsdb'
+305 compile option from '/home/ICer/siicpu/OoOcpu/sim/simv.daidir/vcs_rebuild'.
+306   "vcs '-f' 'flist.f' '-LDFLAGS' '-Wl,--no-as-needed' '-timescale=1ns/1ps' '-fsdb' '-full64' '-R' '+vc' '+v2k' '-sverilog' '-debug_all' 2>&1"
+307 FSDB_VCS_ENABLE_FAST_VC is enable
+308 sps_call_fsdbDumpvars_vd_main at 0 : ../tb/tb_ooocpu.v(127)
+309 [spi_vcs_vd_ppi_create_root]: no upf option
+310 FSDB dumper cannot dump UPF related power signal ($power_tree): no ppiPowerNetwork.
+311 *Verdi* : Begin traversing the scopes, layer (0).
+312 *Verdi* : End of traversing.
+313 pliAppHDL_DumpVarComplete traverse var: profile - 
+          CPU/Mem usage: 0.070 sys,  0.120 user,  344.52M mem
+                   incr: 0.010 sys,  0.010 user,  8.93M mem
+                   accu: 0.010 sys,  0.010 user,  8.93M mem
+              accu incr: 0.010 sys,  0.010 user,  8.93M mem
 
-          Count usage: 1191 var,  571 idcode,  192 callback
-                 incr: 1191 var,  571 idcode,  192 callback
-                 accu: 1191 var,  571 idcode,  192 callback
-            accu incr: 1191 var,  571 idcode,  192 callback
-315 Thu Jun 27 00:38:59 2024
-316 pliAppHDL_DumpVarComplete: profile - 
-          CPU/Mem usage: 0.050 sys,  0.140 user,  345.52M mem
+          Count usage: 1198 var,  570 idcode,  189 callback
+                 incr: 1198 var,  570 idcode,  189 callback
+                 accu: 1198 var,  570 idcode,  189 callback
+            accu incr: 1198 var,  570 idcode,  189 callback
+314 Wed Jul  3 15:57:02 2024
+315 pliAppHDL_DumpVarComplete: profile - 
+          CPU/Mem usage: 0.070 sys,  0.120 user,  345.58M mem
                    incr: 0.000 sys,  0.000 user,  1.05M mem
-                   accu: 0.010 sys,  0.010 user,  9.99M mem
+                   accu: 0.010 sys,  0.010 user,  9.98M mem
               accu incr: 0.000 sys,  0.000 user,  1.05M mem
 
-          Count usage: 1191 var,  571 idcode,  192 callback
+          Count usage: 1198 var,  570 idcode,  189 callback
                  incr: 0 var,  0 idcode,  0 callback
-                 accu: 1191 var,  571 idcode,  192 callback
+                 accu: 1198 var,  570 idcode,  189 callback
             accu incr: 0 var,  0 idcode,  0 callback
-317 Thu Jun 27 00:38:59 2024
-318 sps_call_fsdbDumpMDA_vd_main at 0 : ../tb/tb_ooocpu.v(128)
-319 *Verdi* : Begin traversing the MDAs, layer (0).
-320 *Verdi* : Enable +mda and +packedmda dumping.
-321 *Verdi* : End of traversing the MDAs.
-322 pliAppHDL_DumpVarComplete traverse var: profile - 
-          CPU/Mem usage: 0.060 sys,  0.140 user,  345.65M mem
-                   incr: 0.010 sys,  0.000 user,  0.14M mem
-                   accu: 0.010 sys,  0.000 user,  0.14M mem
-              accu incr: 0.010 sys,  0.000 user,  0.14M mem
+316 Wed Jul  3 15:57:02 2024
+317 sps_call_fsdbDumpMDA_vd_main at 0 : ../tb/tb_ooocpu.v(128)
+318 *Verdi* : Begin traversing the MDAs, layer (0).
+319 *Verdi* : Enable +mda and +packedmda dumping.
+320 *Verdi* : End of traversing the MDAs.
+321 pliAppHDL_DumpVarComplete traverse var: profile - 
+          CPU/Mem usage: 0.070 sys,  0.120 user,  345.71M mem
+                   incr: 0.000 sys,  0.000 user,  0.14M mem
+                   accu: 0.000 sys,  0.000 user,  0.14M mem
+              accu incr: 0.000 sys,  0.000 user,  0.14M mem
 
-          Count usage: 6055 var,  5435 idcode,  276 callback
+          Count usage: 6062 var,  5434 idcode,  273 callback
                  incr: 4864 var,  4864 idcode,  84 callback
                  accu: 4864 var,  4864 idcode,  84 callback
             accu incr: 4864 var,  4864 idcode,  84 callback
-323 Thu Jun 27 00:38:59 2024
-324 pliAppHDL_DumpVarComplete: profile - 
-          CPU/Mem usage: 0.060 sys,  0.140 user,  345.79M mem
-                   incr: 0.000 sys,  0.000 user,  0.14M mem
+322 Wed Jul  3 15:57:02 2024
+323 pliAppHDL_DumpVarComplete: profile - 
+          CPU/Mem usage: 0.080 sys,  0.120 user,  345.85M mem
+                   incr: 0.010 sys,  0.000 user,  0.14M mem
                    accu: 0.010 sys,  0.000 user,  0.27M mem
-              accu incr: 0.000 sys,  0.000 user,  0.14M mem
+              accu incr: 0.010 sys,  0.000 user,  0.14M mem
 
-          Count usage: 6055 var,  5435 idcode,  276 callback
+          Count usage: 6062 var,  5434 idcode,  273 callback
                  incr: 0 var,  0 idcode,  0 callback
                  accu: 4864 var,  4864 idcode,  84 callback
             accu incr: 0 var,  0 idcode,  0 callback
-325 Thu Jun 27 00:38:59 2024
-326 End of simulation at 1003000
-327 Thu Jun 27 00:38:59 2024
-328 Begin FSDB profile info:
-329 FSDB Writer : bc1(1363) bcn(10476) mtf/stf(0/0)
-FSDB Writer elapsed time : flush(0.017556) io wait(0.000000) theadpool wait(0.000000) target functin(0.000000)
+324 Wed Jul  3 15:57:02 2024
+325 End of simulation at 1003000
+326 Wed Jul  3 15:57:02 2024
+327 Begin FSDB profile info:
+328 FSDB Writer : bc1(1291) bcn(9450) mtf/stf(0/0)
+FSDB Writer elapsed time : flush(0.003649) io wait(0.000000) theadpool wait(0.000000) target functin(0.000000)
 FSDB Writer cpu time : MT Compression : 0
-330 End FSDB profile info
-331 Parallel profile    -  Flush:4 Expand:0 ProduceWait:0 ConsumerWait:0 BlockUsed:0
-332                        ProduceTime:0.215735589 ConsumerTime:0.000000000 Buffer:64MB
-333 SimExit
-334 Sim process exit
+329 End FSDB profile info
+330 Parallel profile    -  Flush:4 Expand:0 ProduceWait:0 ConsumerWait:0 BlockUsed:0
+331                        ProduceTime:0.212165317 ConsumerTime:0.000000000 Buffer:64MB
+332 SimExit
+333 Sim process exit

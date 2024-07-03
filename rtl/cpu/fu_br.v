@@ -9,7 +9,7 @@ module fu_br(
     input wire [`WORD_WIDTH-1 : 0]              br_issue_queue_imm,
     input wire [`WORD_WIDTH-1 : 0]              br_issue_queue_rs1_value,
     input wire [`WORD_WIDTH-1 : 0]              br_issue_queue_rs2_value,
-    input wire [$clog2(`ROB_DEPTH)-1 : 0]       br_issue_queue_Pdst_out,
+    input wire [$clog2(`ROB_DEPTH)-1 : 0]       br_issue_queue_Pdst,
     // outputs
     output wire                                 br_finish,
     output wire                                 br_taken,
@@ -30,7 +30,7 @@ assign br_taken =   br_issue_en &&
                     ((br_issue_queue_op == `BR_OP_BGEU) && (br_issue_queue_rs1_value >= br_issue_queue_rs2_value))                          );
 
 assign br_addr      =   br_issue_queue_pc + br_issue_queue_imm;
-assign br_rob       =   br_issue_queue_Pdst_out;
+assign br_rob       =   br_issue_queue_Pdst;
 assign br_out       =   ((br_issue_queue_op == `BR_OP_JAL) || (br_issue_queue_op == `BR_OP_JALR))?  br_issue_queue_pc + 4   : `WORD_WIDTH'b0;
 assign br_out_valid =   (br_issue_queue_op == `BR_OP_JAL) || (br_issue_queue_op == `BR_OP_JALR);
 

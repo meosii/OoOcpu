@@ -132,6 +132,7 @@ assign rd_insn_en = (cpu_en)? 1'b1:1'b0;
         // To rat
     wire                                commit_en;
     wire [`GPR_ADDR_WIDTH-1 : 0]        rob_commit_dst_addr_2rat;   // Aaddr
+    wire [$clog2(`ROB_DEPTH)-1 : 0]     rob_commit_Paddr;                 // Paddr
     wire                                rob_commit_br_taken;        // branch -> refresh the rat
     wire [`PC_WIDTH-1 : 0]              rob_commit_br_addr;
     wire                                rob_commit_exp_en;          // exp -> refresh the rat
@@ -290,6 +291,7 @@ rob u_rob(
     .rob_alloc_dst_wen_2rat     (rob_alloc_dst_wen_2rat     ),
     .commit_en                  (commit_en                  ),
     .rob_commit_dst_addr_2rat   (rob_commit_dst_addr_2rat   ),
+    .rob_commit_Paddr           (rob_commit_Paddr           ),
     .rob_commit_br_taken        (rob_commit_br_taken        ),
     .rob_commit_br_addr         (rob_commit_br_addr         ),
     .rob_commit_exp_en          (rob_commit_exp_en          ),
@@ -306,8 +308,8 @@ rob u_rob(
 rat u_rat(
     .clk                        (clk                        ),
     .rst_n                      (rst_n                      ),
-    .id_rs1_addr                (rs1_addr                ),
-    .id_rs2_addr                (rs2_addr                ),
+    .id_rs1_addr                (rs1_addr                   ),
+    .id_rs2_addr                (rs2_addr                   ),
     .jp_rs1_addr                (jp_rs1_addr                ),
     .allocate_en                (allocate_en                ),
     .rob_alloc_tag_2rat         (rob_alloc_tag_2rat         ),
@@ -315,6 +317,7 @@ rat u_rat(
     .rob_alloc_dst_wen_2rat     (rob_alloc_dst_wen_2rat     ), 
     .commit_en                  (commit_en                  ),
     .rob_commit_dst_addr_2rat   (rob_commit_dst_addr_2rat   ),
+    .rob_commit_Paddr           (rob_commit_Paddr           ),
     .rob_commit_br_taken        (rob_commit_br_taken        ),
     .rob_commit_exp_en          (rob_commit_exp_en          ),
     // output to issue_queue
@@ -332,8 +335,8 @@ gpr u_gpr(
     .commit_en              (commit_en                  ),
     .rob_commit_dst_addr    (rob_commit_dst_addr_2rat   ),
     .rob_commit_dst_value   (rob_commit_dst_value_2rat  ),
-    .rs1_addr               (rs1_addr                ),
-    .rs2_addr               (rs2_addr                ),
+    .rs1_addr               (rs1_addr                   ),
+    .rs2_addr               (rs2_addr                   ),
     .jp_rs1_addr            (jp_rs1_addr                ),
     // outputs to issue_queue and decoder(jump)
     .rs1_value              (rs1_value_fromGPR          ),
@@ -348,6 +351,7 @@ id_reg u_id_reg(
     .id_stall               (id_stall               ),
     .id_flush               (id_flush               ),
     .if_pc                  (if_pc                  ),
+    .if_en                  (if_en                  ),
     .rs1_addr               (rs1_addr               ),
     .rs2_addr               (rs2_addr               ),
     .alu_op                 (alu_op                 ), 
@@ -370,7 +374,7 @@ id_reg u_id_reg(
     .id_br_op               (id_br_op               ),
     .id_imm                 (id_imm                 ),
     .id_alloc_rob           (id_alloc_rob           ),
-    .id_en                  (allocate_en            ),
+    .id_en                  (id_en                  ),
     .id_rs1_rat_valid       (id_rs1_rat_valid       ),
     .id_rs1_Paddr           (id_rs1_Paddr           ),
     .id_rs2_rat_valid       (id_rs2_rat_valid       ),
@@ -450,6 +454,7 @@ issue_queue_ctrl u_issue_queue_ctrl(
     .br_issue_queue_imm_out             (br_issue_queue_imm             ),
     .br_issue_queue_rs1_value_out       (br_issue_queue_rs1_value       ),
     .br_issue_queue_rs2_value_out       (br_issue_queue_rs2_value       ),
+    .br_issue_queue_Pdst_out            (br_issue_queue_Pdst            ),
     // stall in issue
     .stall_in_issue                     (stall_in_issue                 )
 );
@@ -482,6 +487,7 @@ fu_top u_fu_top(
     .br_issue_queue_imm             (br_issue_queue_imm             ),
     .br_issue_queue_rs1_value       (br_issue_queue_rs1_value       ),
     .br_issue_queue_rs2_value       (br_issue_queue_rs2_value       ),
+    .br_issue_queue_Pdst            (br_issue_queue_Pdst            ),
     .CPU_HRDATA                     (CPU_HRDATA                     ),
     .CPU_HREADY                     (CPU_HREADY                     ),
     .CPU_HRESP                      (CPU_HRESP                      ),
@@ -526,12 +532,14 @@ fu_top u_fu_top(
 );
 
 cpu_ctrl u_cpu_ctrl(
+    .if_en              (if_en              ),
     .rob_full           (rob_full           ),
     .stall_in_decoder   (stall_in_decoder   ),
     .stall_in_issue     (stall_in_issue     ),
     .jp_taken           (jp_taken           ),
     .rob_commit_br_taken(rob_commit_br_taken),
     // outputs
+    .allocate_en        (allocate_en        ),
     .pc_stall           (pc_stall           ),
     .if_stall           (if_stall           ),
     .id_stall           (id_stall           ),

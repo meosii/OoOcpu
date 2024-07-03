@@ -24,8 +24,14 @@ assign rs1_value = (commit_en && (rob_commit_dst_addr == rs1_addr))? rob_commit_
 assign rs2_value = (commit_en && (rob_commit_dst_addr == rs2_addr))? rob_commit_dst_value : gpr[rs2_addr];
 assign jp_rs1_data  = gpr[jp_rs1_addr];
 
+always @(posedge clk or negedge rst_n) begin
+    if (!rst_n) begin
+        gpr[0]  <=  `WORD_WIDTH'b0;
+    end
+end
+
 genvar i;
-generate for (i=0; i<32; i++) begin: GENERATE_RAT
+generate for (i=1; i<32; i++) begin: GENERATE_RAT
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             gpr[i]  <=  `WORD_WIDTH'b0;

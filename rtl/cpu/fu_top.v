@@ -32,6 +32,7 @@ module fu_top (
     input wire [`WORD_WIDTH-1 : 0]              br_issue_queue_imm,
     input wire [`WORD_WIDTH-1 : 0]              br_issue_queue_rs1_value,
     input wire [`WORD_WIDTH-1 : 0]              br_issue_queue_rs2_value,
+    input wire [$clog2(`ROB_DEPTH)-1 : 0]       br_issue_queue_Pdst,
     // input from AHB
     input wire [`WORD_WIDTH - 1 : 0]            CPU_HRDATA,
     input wire                                  CPU_HREADY,
@@ -187,6 +188,7 @@ fu_br u_fu_br(
     .br_issue_queue_imm         (br_issue_queue_imm         ),
     .br_issue_queue_rs1_value   (br_issue_queue_rs1_value   ),
     .br_issue_queue_rs2_value   (br_issue_queue_rs2_value   ),
+    .br_issue_queue_Pdst        (br_issue_queue_Pdst        ),
     // outputs
     .br_finish                  (br_finish                  ),
     .br_taken                   (br_taken                   ),

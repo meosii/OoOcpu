@@ -63,6 +63,7 @@ module rob(
         // To rat
     output wire                             commit_en,
     output wire [`GPR_ADDR_WIDTH-1 : 0]     rob_commit_dst_addr_2rat,   // Aaddr
+    output wire [$clog2(`ROB_DEPTH)-1 : 0]  rob_commit_Paddr,           // Paddr
     output wire                             rob_commit_br_taken,        // branch -> refresh the rat
     output wire [`PC_WIDTH-1 : 0]           rob_commit_br_addr,         // branch -> refresh the rat
     output wire                             rob_commit_exp_en,          // exp -> refresh the rat
@@ -89,8 +90,6 @@ reg [$clog2(`ROB_DEPTH) : 0]  rptr;
 
 wire [$clog2(`ROB_DEPTH) : 0] wptr_next;
 wire [$clog2(`ROB_DEPTH) : 0] rptr_next;
-
-wire [$clog2(`ROB_DEPTH)-1 : 0]   commit_rob;
 
 wire    rob_empty;
 
@@ -123,10 +122,10 @@ always @(posedge clk or negedge rst_n) begin
     end
 end
 
-assign alloc_rob    = wptr[$clog2(`ROB_DEPTH)-1 : 0];
-assign commit_rob   = rptr[$clog2(`ROB_DEPTH)-1 : 0];
+assign alloc_rob        = wptr[$clog2(`ROB_DEPTH)-1 : 0];
+assign rob_commit_Paddr = rptr[$clog2(`ROB_DEPTH)-1 : 0];
 
-assign wptr_next =  (rob_commit_br_taken)?  commit_rob+1:
+assign wptr_next =  (rob_commit_br_taken)?  rob_commit_Paddr+1:
                     (allocate_en        )?  wptr + 1    :   wptr;
 
 assign rptr_next =  (commit_en)? rptr + 1   :   rptr;
@@ -141,17 +140,17 @@ assign rob_alloc_dst_addr_2rat = dst_addr;
 assign rob_alloc_dst_wen_2rat = dst_wen;
 
 // ROB commit to rat and gpr
-assign commit_en                    =   rob_dst_value_ready [commit_rob]    || 
-                                        rob_store_ready     [commit_rob]    ||
-                                        rob_branch_ready    [commit_rob]    ;
+assign commit_en                    =  (rob_dst_value_ready [rob_commit_Paddr]  || 
+                                        rob_store_ready     [rob_commit_Paddr]  ||
+                                        rob_branch_ready    [rob_commit_Paddr]  )   &&  !rob_empty;
 
-assign rob_commit_dst_addr_2rat     =   rob_dst_addr        [commit_rob]    ;
-assign rob_commit_br_taken          =   rob_br_taken        [commit_rob]    ;
-assign rob_commit_br_addr           =   rob_br_addr         [commit_rob]    ;
-assign rob_commit_exp_en            =   rob_exp_en          [commit_rob]    ;
+assign rob_commit_dst_addr_2rat     =   rob_dst_addr        [rob_commit_Paddr]  ;
+assign rob_commit_br_taken          =   rob_br_taken        [rob_commit_Paddr]  ;
+assign rob_commit_br_addr           =   rob_br_addr         [rob_commit_Paddr]  ;
+assign rob_commit_exp_en            =   rob_exp_en          [rob_commit_Paddr]  ;
 
 // ROB commit to Physical regfile
-assign rob_commit_dst_value_2rat    =   rob_dst_value       [commit_rob]    ;
+assign rob_commit_dst_value_2rat    =   rob_dst_value       [rob_commit_Paddr]  ;
 
 // write rob, from allocate
 always @(posedge clk) begin
@@ -172,6 +171,8 @@ generate
                 rob_branch_ready[i] <= 1'b0;
             end else if (wb_br_finish && (wb_br_rob == i)) begin
                 rob_branch_ready[i] <= 1'b1; 
+            end else if ((rob_commit_Paddr == i) || (rob_commit_br_taken)) begin
+                rob_branch_ready[i] <= 1'b0;
             end
         end
         always @(posedge clk or negedge rst_n) begin
@@ -181,6 +182,9 @@ generate
             end else if (wb_br_finish && (wb_br_rob == i) && wb_br_taken) begin
                 rob_br_taken[i] <= 1'b1; 
                 rob_br_addr [i] <= wb_br_addr;
+            end else if ((rob_commit_Paddr == i) || (rob_commit_br_taken)) begin
+                rob_br_taken[i] <= 1'b0;
+                rob_br_addr[i]  <= `PC_WIDTH'b0;
             end
         end
         always @(posedge clk or negedge rst_n) begin
@@ -188,6 +192,8 @@ generate
                 rob_store_ready[i] <= 1'b0;
             end else if (store_finish && (wb_mem_dst_Paddr == i)) begin
                 rob_store_ready[i] <= 1'b1; 
+            end else if ((rob_commit_Paddr == i) || (rob_commit_br_taken)) begin
+                rob_store_ready[i] <= 1'b0;
             end
         end
         always @(posedge clk or negedge rst_n) begin
@@ -208,6 +214,8 @@ generate
             end else if (wb_br_out_valid && (wb_br_rob == i)) begin   // mem load
                 rob_dst_value[i]        <= wb_br_out;
                 rob_dst_value_ready[i]  <= 1'b1;
+            end else if ((rob_commit_Paddr == i) || (rob_commit_br_taken)) begin  // clear
+                rob_dst_value_ready[i] <= 1'b0;
             end
         end
     end

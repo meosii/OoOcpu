@@ -1,3 +1,3 @@
 Command Line: /home/synopsys/verdi/Verdi_O-2018.09-SP2/platform/LINUXAMD64/bin/Novas -nologo +v2k -sverilog -f flist.f -ssf wave_ooocpu.fsdb
 uname(Linux IC_EDA 3.10.0-1160.53.1.el7.x86_64 #1 SMP Fri Jan 14 13:59:45 UTC 2022 x86_64)
-au time 102274.569929 64.648021 313.926376 delta 896839680 896839680 total 1321922560 1321922560
+au time 9.574210 1.568638 1.418738 delta 318238720 318238720 total 743321600 743321600

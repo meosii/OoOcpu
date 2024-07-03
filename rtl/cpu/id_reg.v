@@ -8,6 +8,7 @@ module id_reg(
     input wire                                  id_flush,
     // from if_reg
     input wire [`PC_WIDTH-1 : 0]                if_pc,
+    input wire                                  if_en,
     // from decoder
     input wire  [`GPR_ADDR_WIDTH-1 : 0]         rs1_addr,
     input wire  [`GPR_ADDR_WIDTH-1 : 0]         rs2_addr,
@@ -76,7 +77,7 @@ always @(posedge clk or negedge rst_n) begin
             id_rs1_value_fromGPR<=  `WORD_WIDTH'b0;
             id_rs2_value_fromGPR<=  `WORD_WIDTH'b0;
         end else if (!id_stall) begin
-            id_en               <= 1'b1;
+            id_en               <= if_en;
             id_pc               <= if_pc;
             id_rs1_addr         <= rs1_addr; 
             id_rs2_addr         <=  rs2_addr;

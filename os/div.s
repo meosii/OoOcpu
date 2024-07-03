@@ -3,21 +3,20 @@ _start:
 li sp, 2415935488
 addi sp,sp,-64
 main:
-li a5,1000
+li a5,1200
 li a4,20
-div x16,a5,a4
-rem x17,a5,a4
-addi s4,x16,4
-li x10,-30
-li x11,256
-div x12,x10,x11
-rem x13,x10,x11
-addi x14,x16,1
-and x15,a5,a4
-sub x16,a5,x17
-li x17,500
-addi x18,x11,244
-beq x18,x17,br
+div a6,a5,a4
+rem a7,a5,a4
+li a0,3000
+li a1,3
+jal ra,jump
+div a2,a0,a1
+rem a3,a0,a1
+li a5,1500
+addi a4,a2,1000
+sub a6,a4,a5
+li a7,500
+beq a6,a7,br
 li x10,0
 li x11,1
 li x12,2
@@ -32,3 +31,14 @@ li x19,9
 li x20,10
 add x21,x10,x11
 add x22,x12,x13
+jump:
+li x10,0x20
+li x20,0xff
+lw x15,0x10(x10)
+sw x20,0x10(x10)
+li x10,0xaa
+li x20,0xbb
+add x21,x10,x11
+add x22,x12,x13
+li x10,0
+jalr ra,x10,0x50
