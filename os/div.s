@@ -32,10 +32,21 @@ li x20,10
 add x21,x10,x11
 add x22,x12,x13
 jump:
-li x10,0x20
-li x20,0xff
-lw x15,0x10(x10)
-sw x20,0x10(x10)
+li x13,7
+li x14,8
+li x15,9
+li x16,10
+li x17,11
+li x10,0x90000000
+li x11,0x90000004
+li x12,0x90000008
+sw x13,0(x10)
+sw x14,0(x11)
+sw x15,0(x12)
+lw x20,0(x10)
+lw x21,0(x11)
+lw x22,0(x12)
+add x23,x22,x21
 li x10,0xaa
 li x20,0xbb
 add x21,x10,x11

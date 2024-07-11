@@ -48,7 +48,10 @@ wire    bus_trans_ready;
 wire    bus_trans_wait;
 wire    bus_trans_error_stage1;
 wire    bus_trans_error_stage2;
-reg     bus_spm_enable_r1;
+
+reg                         bus_spm_enable_r1;
+reg [`WORD_WIDTH - 1 : 0]   spm_rd_data_r1;
+
 wire    ahb_bus_wait;   // ahb bus not get the valid data
 
 assign  load_store_enable   = (memory_rd_en || memory_wr_en);
@@ -62,9 +65,11 @@ assign  bus_trans_error_stage2  =  CPU_HREADY  && (CPU_HRESP == `HRESP_ERROR);
 
 always @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
-        bus_spm_enable_r1 <= 1'b0;
+        bus_spm_enable_r1   <= 1'b0;
+        spm_rd_data_r1      <= `WORD_WIDTH'b0;
     end else begin
-        bus_spm_enable_r1 <= bus_spm_enable;
+        bus_spm_enable_r1   <= bus_spm_enable;
+        spm_rd_data_r1      <= spm_rd_data;
     end
 end
 
@@ -176,7 +181,7 @@ assign spm_rdaddress        = memory_addr;
 assign spm_wraddress        = memory_addr;
 
 // to mem_ctrl
-assign load_rd_data =   (bus_spm_enable_r1  )?  spm_rd_data : 
+assign load_rd_data =   (bus_spm_enable_r1  )?  spm_rd_data_r1 : 
                         (trans_end_en       )?  CPU_HRDATA  : `WORD_WIDTH'b0;
 // exception
 assign ahb_exp_en   =   ((c_trans_state == TRANSING) && (bus_trans_error_stage1))? 1'b1 : 1'b0;

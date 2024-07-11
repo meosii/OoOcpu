@@ -94,8 +94,8 @@ ooocpu u_ooocpu(
 spm u_spm(
     .clk                (clk                ),
     .rst_n              (rst_n              ),
-    .spm_rdaddress      (spm_rdaddress      ),
-    .spm_wraddress      (spm_wraddress      ),
+    .spm_rdaddress      (spm_rdaddress[9:0] ),
+    .spm_wraddress      (spm_wraddress[9:0] ),
     .spm_rden           (spm_rden           ),
     .spm_wren           (spm_wren           ),
     .spm_write_data     (spm_write_data     ),
