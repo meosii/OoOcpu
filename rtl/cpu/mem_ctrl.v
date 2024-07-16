@@ -84,10 +84,11 @@ wire                                miss_align_in_spm;
 assign offset                   =   memory_addr[`BYTE_OFFSET_LOC];
 assign miss_align_in_spm        =   (memory_addr[`SPM_ADDR_HIGH_LOCA] == `SPM_ADDR_HIGH) && (offset != `BYTE_OFFSET_WORD);
 
-assign exp_code_in_mem_ctrl     =   (miss_align_in_spm && memory_rd_en)? `ISA_EXP_LOAD_MISALIGNED     :
-                                    (miss_align_in_spm && memory_wr_en)? `ISA_EXP_STORE_MISALIGNED    : `ISA_EXP_NO_EXP;
+assign exp_code_in_mem_ctrl     =   (ahb_exp_code != `ISA_EXP_NO_EXP    )? ahb_exp_code                 :
+                                    (miss_align_in_spm && memory_rd_en  )? `ISA_EXP_LOAD_MISALIGNED     :
+                                    (miss_align_in_spm && memory_wr_en  )? `ISA_EXP_STORE_MISALIGNED    : `ISA_EXP_NO_EXP;
 
-// ------------------------------------- writeback to rob -----------------------------------------------------------------------------
+// ------------------------------------- writeback to rob -------------------------------------------------------------------
 // one ahb trans finished, or spm finished
 // registers
 reg                                 mem_issue_en_r1; // spm ready

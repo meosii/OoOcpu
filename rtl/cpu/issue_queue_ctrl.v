@@ -8,18 +8,19 @@ module issue_queue_ctrl (
     input wire [`DATA_WIDTH_ALU_OP - 1 : 0]     id_alu_op,          // include div and mul
     input wire [`DATA_WIDTH_MEM_OP - 1 : 0]     id_mem_op,
     input wire [`DATA_WIDTH_BR_OP - 1 : 0]      id_br_op,
+    input wire [`DATA_WIDTH_CSR_OP - 1 : 0]     id_csr_op,
     input wire [`PC_WIDTH-1 : 0]                id_pc,
     input wire [`WORD_WIDTH-1 : 0]              id_imm,
     input wire [$clog2(`ROB_DEPTH)-1 : 0]       id_alloc_rob,       // from rob -> if_reg (Pdst)
     // from rat
-    input wire                                  id_rs1_rat_valid,      // rat_valid==0, rs1_value_fromGPR is valid.
+    input wire                                  id_rs1_rat_valid,   // rat_valid==0, rs1_value_fromGPR is valid.
     input wire [$clog2(`ROB_DEPTH)-1 : 0]       id_rs1_Paddr,
     input wire                                  id_rs2_rat_valid,
     input wire [$clog2(`ROB_DEPTH)-1 : 0]       id_rs2_Paddr,
     // from gpr
     input wire [`WORD_WIDTH-1 : 0]              id_rs1_value_fromGPR,  // rs1 -> gpr -> rs1_value
     input wire [`WORD_WIDTH-1 : 0]              id_rs2_value_fromGPR,
-   // from rob
+    // from rob
     input wire                                  rs1_fromROB_valid,
     input wire                                  rs2_fromROB_valid,
     input wire [`WORD_WIDTH-1 : 0]              rs1_value_fromROB,
@@ -46,7 +47,10 @@ module issue_queue_ctrl (
     input wire [$clog2(`ROB_DEPTH)-1 : 0]       wb_br_rob,
     input wire [`WORD_WIDTH-1 : 0]              wb_br_out,                  // jal and jalr: rd = pc+4
     input wire                                  wb_br_out_valid,
-
+        // from csr
+    input wire [$clog2(`ROB_DEPTH)-1 : 0]       wb_csr_dst_Paddr,
+    input wire [`WORD_WIDTH - 1 : 0]            wb_csr_data,
+    input wire                                  wb_csr_valid,
     // branch and exception
     input wire                                  rob_commit_br_taken,    // branch -> refresh the issue_queue
     input wire                                  rob_commit_exp_en,          // exp -> refresh the issue_queue
@@ -89,6 +93,10 @@ module issue_queue_ctrl (
     output wire [`WORD_WIDTH-1 : 0]             br_issue_queue_rs1_value_out,
     output wire [`WORD_WIDTH-1 : 0]             br_issue_queue_rs2_value_out,
     output wire [$clog2(`ROB_DEPTH)-1 : 0]      br_issue_queue_Pdst_out,
+    // to rob csr
+    output wire                                 csr_issue_en_out,
+    output wire [`WORD_WIDTH-1 : 0]             csr_issue_queue_rs1_value_out,
+    output wire [$clog2(`ROB_DEPTH)-1 : 0]      csr_issue_queue_Pdst_out,
     // issue queue full
     output wire                                 stall_in_issue
 );
@@ -97,16 +105,19 @@ wire    alu_insn_en;
 wire    mul_div_insn_en;
 wire    mem_insn_en;
 wire    br_insn_en;
+wire    csr_insn_en;
 // from issue queue: dispatch_en?
 wire    alu_issue_queue_full;
 wire    mul_div_issue_queue_full;
 wire    mem_issue_queue_full;
 wire    br_issue_queue_full;
+wire    csr_issue_queue_full;
 // to issue queue
 wire    issue2alu_en;
 wire    issue2mul_div_en;
 wire    issue2mem_en;
 wire    issue2br_en;
+wire    issue2csr_en;
 // rs1 and rs1 value
 wire                             rs1_Paddr_valid;
 wire                             rs2_Paddr_valid;
@@ -151,17 +162,19 @@ assign  mul_div_insn_en =   (id_alu_op == `ALU_OP_MUL   ||
 
 assign  mem_insn_en     =   !(id_mem_op == `MEM_OP_NOP);
 assign  br_insn_en      =   !(id_br_op == `BR_OP_NOP);
-
+assign  csr_insn_en     =   !(id_csr_op == `CSR_OP_NOP);
 
 assign  issue2alu_en        =   !alu_issue_queue_full       && alu_insn_en;
 assign  issue2mul_div_en    =   !mul_div_issue_queue_full   && mul_div_insn_en;
 assign  issue2mem_en        =   !mem_issue_queue_full       && mem_insn_en;
 assign  issue2br_en         =   !br_issue_queue_full        && br_insn_en;
+assign  issue2csr_en        =   !csr_issue_queue_full       && csr_insn_en;
 
-assign stall_in_issue   =   (alu_issue_queue_full       && alu_insn_en      ) ||
-                            (mul_div_issue_queue_full   && mul_div_insn_en  ) ||
-                            (mem_issue_queue_full       && mem_insn_en      ) ||
-                            (br_issue_queue_full        && br_insn_en       )  ;
+assign stall_in_issue   =   (alu_issue_queue_full       && alu_insn_en      )   ||
+                            (mul_div_issue_queue_full   && mul_div_insn_en  )   ||
+                            (mem_issue_queue_full       && mem_insn_en      )   ||
+                            (br_issue_queue_full        && br_insn_en       )   ||
+                            (csr_issue_queue_full       && csr_insn_en      );
 
 issue_queue_OoO #(
     .OP_WIDTH                   (`DATA_WIDTH_ALU_OP             )
@@ -176,11 +189,11 @@ issue_queue_OoO #(
     .id_imm                     (id_imm                         ),
     .id_alloc_rob               (id_alloc_rob                   ),
     .rs1_rat_valid              (rs1_Paddr_valid                ),
-    .rs1_Paddr                  (id_rs1_Paddr                      ),
-    .rs2_rat_valid              (rs2_Paddr_valid                  ),
-    .rs2_Paddr                  (id_rs2_Paddr                      ),
-    .rs1_value_fromGPR          (rs1_value_write              ),
-    .rs2_value_fromGPR          (rs2_value_write              ),
+    .rs1_Paddr                  (id_rs1_Paddr                   ),
+    .rs2_rat_valid              (rs2_Paddr_valid                ),
+    .rs2_Paddr                  (id_rs2_Paddr                   ),
+    .rs1_value_fromGPR          (rs1_value_write                ),
+    .rs2_value_fromGPR          (rs2_value_write                ),
     .wb_alu_dst_Paddr           (wb_alu_dst_Paddr               ),
     .wb_alu_out                 (wb_alu_out                     ),
     .wb_alu_valid               (wb_alu_valid                   ),
@@ -196,6 +209,9 @@ issue_queue_OoO #(
     .wb_br_rob                  (wb_br_rob                      ),
     .wb_br_out                  (wb_br_out                      ),
     .wb_br_out_valid            (wb_br_out_valid                ),
+    .wb_csr_data                (wb_csr_data                    ),
+    .wb_csr_dst_Paddr           (wb_csr_dst_Paddr               ),
+    .wb_csr_valid               (wb_csr_valid                   ),
     .rob_commit_br_taken        (rob_commit_br_taken            ),
     .rob_commit_exp_en          (rob_commit_exp_en              ),
     .fu_ready                   (1'b1                           ),
@@ -222,12 +238,12 @@ issue_queue_OoO_MD #(
     .id_pc                      (id_pc                              ),
     .id_imm                     (id_imm                             ),
     .id_alloc_rob               (id_alloc_rob                       ),
-    .rs1_rat_valid              (rs1_Paddr_valid                      ),
-    .rs1_Paddr                  (id_rs1_Paddr                          ),
-    .rs2_rat_valid              (rs2_Paddr_valid                      ),
-    .rs2_Paddr                  (id_rs2_Paddr                          ),
-    .rs1_value_fromGPR          (rs1_value_write            ),
-    .rs2_value_fromGPR          (rs2_value_write                 ),
+    .rs1_rat_valid              (rs1_Paddr_valid                    ),
+    .rs1_Paddr                  (id_rs1_Paddr                       ),
+    .rs2_rat_valid              (rs2_Paddr_valid                    ),
+    .rs2_Paddr                  (id_rs2_Paddr                       ),
+    .rs1_value_fromGPR          (rs1_value_write                    ),
+    .rs2_value_fromGPR          (rs2_value_write                    ),
     .wb_alu_dst_Paddr           (wb_alu_dst_Paddr                   ),
     .wb_alu_out                 (wb_alu_out                         ),
     .wb_alu_valid               (wb_alu_valid                       ),
@@ -243,6 +259,9 @@ issue_queue_OoO_MD #(
     .wb_br_rob                  (wb_br_rob                          ),
     .wb_br_out                  (wb_br_out                          ),
     .wb_br_out_valid            (wb_br_out_valid                    ),
+    .wb_csr_data                (wb_csr_data                        ),
+    .wb_csr_dst_Paddr           (wb_csr_dst_Paddr                   ),
+    .wb_csr_valid               (wb_csr_valid                       ),
     .rob_commit_br_taken        (rob_commit_br_taken                ),
     .rob_commit_exp_en          (rob_commit_exp_en                  ),
     .mul_ready                  (mul_ready                          ),
@@ -270,12 +289,12 @@ issue_queue_InO #(
     .id_pc                      (id_pc                          ),
     .id_imm                     (id_imm                         ),
     .id_alloc_rob               (id_alloc_rob                   ),
-    .rs1_rat_valid              (rs1_Paddr_valid                  ),
-    .rs1_Paddr                  (id_rs1_Paddr                      ),
-    .rs2_rat_valid              (rs2_Paddr_valid                  ),
-    .rs2_Paddr                  (id_rs2_Paddr                      ),
-    .rs1_value_fromGPR          (rs1_value_write              ),
-    .rs2_value_fromGPR          (rs2_value_write              ),
+    .rs1_rat_valid              (rs1_Paddr_valid                ),
+    .rs1_Paddr                  (id_rs1_Paddr                   ),
+    .rs2_rat_valid              (rs2_Paddr_valid                ),
+    .rs2_Paddr                  (id_rs2_Paddr                   ),
+    .rs1_value_fromGPR          (rs1_value_write                ),
+    .rs2_value_fromGPR          (rs2_value_write                ),
     .wb_alu_dst_Paddr           (wb_alu_dst_Paddr               ),
     .wb_alu_out                 (wb_alu_out                     ),
     .wb_alu_valid               (wb_alu_valid                   ),
@@ -291,6 +310,9 @@ issue_queue_InO #(
     .wb_br_rob                  (wb_br_rob                      ),
     .wb_br_out                  (wb_br_out                      ),
     .wb_br_out_valid            (wb_br_out_valid                ),
+    .wb_csr_data                (wb_csr_data                    ),
+    .wb_csr_dst_Paddr           (wb_csr_dst_Paddr               ),
+    .wb_csr_valid               (wb_csr_valid                   ),
     .rob_commit_br_taken        (rob_commit_br_taken            ),
     .rob_commit_exp_en          (rob_commit_exp_en              ),
     .fu_ready                   (mem_ready                      ),
@@ -316,12 +338,12 @@ issue_queue_InO #(
     .id_pc                      (id_pc                          ),
     .id_imm                     (id_imm                         ),
     .id_alloc_rob               (id_alloc_rob                   ),
-    .rs1_rat_valid              (rs1_Paddr_valid                  ),
-    .rs1_Paddr                  (id_rs1_Paddr                      ),
-    .rs2_rat_valid              (rs2_Paddr_valid                  ),
-    .rs2_Paddr                  (id_rs2_Paddr                      ),
-    .rs1_value_fromGPR          (rs1_value_write              ),
-    .rs2_value_fromGPR          (rs2_value_write              ),
+    .rs1_rat_valid              (rs1_Paddr_valid                ),
+    .rs1_Paddr                  (id_rs1_Paddr                   ),
+    .rs2_rat_valid              (rs2_Paddr_valid                ),
+    .rs2_Paddr                  (id_rs2_Paddr                   ),
+    .rs1_value_fromGPR          (rs1_value_write                ),
+    .rs2_value_fromGPR          (rs2_value_write                ),
     .wb_alu_dst_Paddr           (wb_alu_dst_Paddr               ),
     .wb_alu_out                 (wb_alu_out                     ),
     .wb_alu_valid               (wb_alu_valid                   ),
@@ -337,6 +359,9 @@ issue_queue_InO #(
     .wb_br_rob                  (wb_br_rob                      ),
     .wb_br_out                  (wb_br_out                      ),
     .wb_br_out_valid            (wb_br_out_valid                ),
+    .wb_csr_data                (wb_csr_data                    ),
+    .wb_csr_dst_Paddr           (wb_csr_dst_Paddr               ),
+    .wb_csr_valid               (wb_csr_valid                   ),
     .rob_commit_br_taken        (rob_commit_br_taken            ),
     .rob_commit_exp_en          (rob_commit_exp_en              ),
     .fu_ready                   (1'b1                           ),
@@ -351,5 +376,42 @@ issue_queue_InO #(
     .issue_queue_full           (br_issue_queue_full            )
 );
 
+issue_queue_InO_csr #(
+    .OP_WIDTH                   (`DATA_WIDTH_CSR_OP             )
+)u_issue_queue_InO_csr(
+    .clk                        (clk                            ),
+    .rst_n                      (rst_n                          ),
+    // inputs
+    .issue2queue_en             (issue2csr_en                   ),
+    .id_alloc_rob               (id_alloc_rob                   ),
+    .rs1_rat_valid              (rs1_Paddr_valid                ),
+    .rs1_Paddr                  (id_rs1_Paddr                   ),
+    .rs1_value_fromGPR          (rs1_value_write                ),
+    .wb_alu_dst_Paddr           (wb_alu_dst_Paddr               ),
+    .wb_alu_out                 (wb_alu_out                     ),
+    .wb_alu_valid               (wb_alu_valid                   ),
+    .wb_div_dst_Paddr           (wb_div_dst_Paddr               ),
+    .wb_div_out                 (wb_div_out                     ),
+    .wb_div_valid               (wb_div_valid                   ),
+    .wb_mul_dst_Paddr           (wb_mul_dst_Paddr               ),
+    .wb_mul_out                 (wb_mul_out                     ),
+    .wb_mul_valid               (wb_mul_valid                   ),
+    .wb_load_dst_Paddr          (wb_load_dst_Paddr              ),
+    .wb_load_data               (wb_load_data                   ),
+    .wb_load_valid              (wb_load_valid                  ),
+    .wb_br_rob                  (wb_br_rob                      ),
+    .wb_br_out                  (wb_br_out                      ),
+    .wb_br_out_valid            (wb_br_out_valid                ),
+    .wb_csr_data                (wb_csr_data                    ),
+    .wb_csr_dst_Paddr           (wb_csr_dst_Paddr               ),
+    .wb_csr_valid               (wb_csr_valid                   ),
+    .rob_commit_br_taken        (rob_commit_br_taken            ),
+    .rob_commit_exp_en          (rob_commit_exp_en              ),
+    // outputs
+    .issue_en_out               (csr_issue_en_out               ),
+    .issue_queue_rs1_value_out  (csr_issue_queue_rs1_value_out  ),
+    .issue_queue_Pdst_out       (csr_issue_queue_Pdst_out       ),
+    .issue_queue_full           (csr_issue_queue_full           )
+);
 endmodule
 `endif

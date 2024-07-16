@@ -8,6 +8,7 @@
 ../rtl/cpu/fu_br.v
 ../rtl/cpu/gpr.v
 ../rtl/cpu/issue_queue_InO.v
+../rtl/cpu/issue_queue_InO_csr.v
 ../rtl/cpu/mul_booth_radix_4.v
 ../rtl/cpu/ooocpu.v
 ../rtl/cpu/rob.v
@@ -30,3 +31,5 @@
 ../rtl/cpu/mem_ctrl.v
 ../rtl/cpu/mul_wallace.v
 ../rtl/cpu/rat.v
+../rtl/cpu/csr.v
+../rtl/cpu/csr_ctrl.v

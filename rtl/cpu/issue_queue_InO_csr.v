@@ -1,6 +1,6 @@
-`ifndef OOOCPU_ISSUE_QUEUE_INO
-`define OOOCPU_ISSUE_QUEUE_INO
-module issue_queue_InO #(
+`ifndef OOOCPU_ISSUE_QUEUE_INO_CSR
+`define OOOCPU_ISSUE_QUEUE_INO_CSR
+module issue_queue_InO_csr #(
     parameter OP_WIDTH
 )(
     input wire                                  clk,
@@ -8,17 +8,11 @@ module issue_queue_InO #(
     
     // from issue queue ctrl
     input wire                                  issue2queue_en,
-    input wire [OP_WIDTH - 1 : 0]               id_op,
-    input wire [`PC_WIDTH-1 : 0]                id_pc,
-    input wire [`WORD_WIDTH-1 : 0]              id_imm,
     input wire [$clog2(`ROB_DEPTH)-1 : 0]       id_alloc_rob,   // from rob -> if_reg
 
     input wire                                  rs1_rat_valid,  // when rat_valid==0, rs1_value_fromGPR is valid.
     input wire [$clog2(`ROB_DEPTH)-1 : 0]       rs1_Paddr,
-    input wire                                  rs2_rat_valid,
-    input wire [$clog2(`ROB_DEPTH)-1 : 0]       rs2_Paddr,
     input wire [`WORD_WIDTH-1 : 0]              rs1_value_fromGPR,
-    input wire [`WORD_WIDTH-1 : 0]              rs2_value_fromGPR,
     
     // from writeback, when rat_valid==1
         // from alu
@@ -50,17 +44,10 @@ module issue_queue_InO #(
     input wire                                  rob_commit_br_taken,    // branch -> refresh the issue_queue
     input wire                                  rob_commit_exp_en,          // exp -> refresh the issue_queue
 
-    // FU ready
-    input wire                                  fu_ready,
-
     // outputs
     // to FU
     output wire                                 issue_en_out,
-    output wire [OP_WIDTH-1 : 0]                issue_queue_op_out,
-    output wire [`PC_WIDTH-1 : 0]               issue_queue_pc_out,
-    output wire [`WORD_WIDTH-1 : 0]             issue_queue_imm_out,
     output wire [`WORD_WIDTH-1 : 0]             issue_queue_rs1_value_out,
-    output wire [`WORD_WIDTH-1 : 0]             issue_queue_rs2_value_out,
     output wire [$clog2(`ROB_DEPTH)-1 : 0]      issue_queue_Pdst_out,
     // 
     output wire                                 issue_queue_full
@@ -69,17 +56,11 @@ module issue_queue_InO #(
 // -----------------------------------issue queue---------------------------------------------------------
 reg [$clog2(`ROB_DEPTH)-1 : 0]  issue_queue_Prs1                [0 : `ISSUE_QUEUE_DEPTH-1];
 reg                             issue_queue_Prs1_valid          [0 : `ISSUE_QUEUE_DEPTH-1];
-reg [$clog2(`ROB_DEPTH)-1 : 0]  issue_queue_Prs2                [0 : `ISSUE_QUEUE_DEPTH-1];
-reg                             issue_queue_Prs2_valid          [0 : `ISSUE_QUEUE_DEPTH-1];
 reg [$clog2(`ROB_DEPTH)-1 : 0]  issue_queue_Pdst                [0 : `ISSUE_QUEUE_DEPTH-1]; // alloc rob
-wire                            issue_queue_valid               [0 : `ISSUE_QUEUE_DEPTH-1]; // not be refresh
+wire                            issue_queue_valid               [0 : `ISSUE_QUEUE_DEPTH-1]; // not be flushed
 wire                            issue_queue_ready               [0 : `ISSUE_QUEUE_DEPTH-1]; // data1 and data2 ready
 // -----------------------------------payload RAM---------------------------------------------------------
-reg [OP_WIDTH-1 : 0]            issue_queue_op                  [0 : `ISSUE_QUEUE_DEPTH-1];
-reg [`PC_WIDTH-1 : 0]           issue_queue_pc                  [0 : `ISSUE_QUEUE_DEPTH-1];
-reg [`WORD_WIDTH-1 : 0]         issue_queue_imm                 [0 : `ISSUE_QUEUE_DEPTH-1];
 reg [`WORD_WIDTH-1 : 0]         issue_queue_rs1_value           [0 : `ISSUE_QUEUE_DEPTH-1];
-reg [`WORD_WIDTH-1 : 0]         issue_queue_rs2_value           [0 : `ISSUE_QUEUE_DEPTH-1];
 //--------------------------------------------------------------------------------------------------------
 
 // issue queue(fifo): compressed structure, issue_queue[0] is the oldest insn in the queue,
@@ -110,46 +91,28 @@ assign issue_en         =   issue_queue_ready[0] && issue_queue_valid[0];
 assign issue_tag        =   2'b0;   // in order issue
 //-------------------------------------------------------------------------------------------------------------------
 assign fifo_write_en    =   !fifo_full  && issue2queue_en;
-assign fifo_issue_en    =   !fifo_empty && issue_en && fu_ready;
+assign fifo_issue_en    =   !fifo_empty && issue_en;
 assign issue_en_out     =   fifo_issue_en;
 
-assign issue_queue_op_out           =   issue_queue_op          [issue_tag];
-assign issue_queue_pc_out           =   issue_queue_pc          [issue_tag];
-assign issue_queue_imm_out          =   issue_queue_imm         [issue_tag];
 assign issue_queue_rs1_value_out    =   issue_queue_rs1_value   [issue_tag];
-assign issue_queue_rs2_value_out    =   issue_queue_rs2_value   [issue_tag];
 assign issue_queue_Pdst_out         =   issue_queue_Pdst        [issue_tag];
                         
 // ------------------------ writeback--------------------------------------------------------------------------------
 wire [`WORD_WIDTH-1 : 0]    writeback_rs1_data  [0 : `ISSUE_QUEUE_DEPTH-1];
-wire [`WORD_WIDTH-1 : 0]    writeback_rs2_data  [0 : `ISSUE_QUEUE_DEPTH-1];
 wire                        writeback_rs1_en    [0 : `ISSUE_QUEUE_DEPTH-1];
-wire                        writeback_rs2_en    [0 : `ISSUE_QUEUE_DEPTH-1];
 wire                        wb_alu_in_writers1;
-wire                        wb_alu_in_writers2;
 wire                        wb_div_in_writers1;
-wire                        wb_div_in_writers2;
 wire                        wb_mul_in_writers1;
-wire                        wb_mul_in_writers2;
 wire                        wb_load_in_writers1;
-wire                        wb_load_in_writers2;
 wire                        wb_br_in_writers1;
-wire                        wb_br_in_writers2;
 wire                        wb_csr_in_writers1;
-wire                        wb_csr_in_writers2;
 
 assign wb_alu_in_writers1   = (wb_alu_dst_Paddr == rs1_Paddr)   && rs1_rat_valid && fifo_write_en;
-assign wb_alu_in_writers2   = (wb_alu_dst_Paddr == rs2_Paddr)   && rs2_rat_valid && fifo_write_en;
 assign wb_div_in_writers1   = (wb_div_dst_Paddr == rs1_Paddr)   && rs1_rat_valid && fifo_write_en;
-assign wb_div_in_writers2   = (wb_div_dst_Paddr == rs2_Paddr)   && rs2_rat_valid && fifo_write_en;
 assign wb_mul_in_writers1   = (wb_mul_dst_Paddr == rs1_Paddr)   && rs1_rat_valid && fifo_write_en;
-assign wb_mul_in_writers2   = (wb_mul_dst_Paddr == rs2_Paddr)   && rs2_rat_valid && fifo_write_en;
 assign wb_load_in_writers1  = (wb_load_dst_Paddr== rs1_Paddr)   && rs1_rat_valid && fifo_write_en;
-assign wb_load_in_writers2  = (wb_load_dst_Paddr== rs2_Paddr)   && rs2_rat_valid && fifo_write_en;
 assign wb_br_in_writers1    = (wb_br_rob        == rs1_Paddr)   && rs1_rat_valid && fifo_write_en;
-assign wb_br_in_writers2    = (wb_br_rob        == rs2_Paddr)   && rs2_rat_valid && fifo_write_en;
 assign wb_csr_in_writers1   = (wb_csr_dst_Paddr == rs1_Paddr)   && rs1_rat_valid && fifo_write_en;
-assign wb_csr_in_writers2   = (wb_csr_dst_Paddr == rs2_Paddr)   && rs2_rat_valid && fifo_write_en;
 
 genvar i;
     // rs1
@@ -174,29 +137,6 @@ generate
                                             ((((wb_csr_dst_Paddr == issue_queue_Prs1[i]) && issue_queue_Prs1_valid[i]) || (wb_csr_in_writers1 && fifo_p[i])) && wb_csr_valid    )?  wb_csr_data :   'b0;
     end
 endgenerate
-    // rs2
-generate 
-    for (i=0; i<`ISSUE_QUEUE_DEPTH; i++) begin: GENERATE_ISSUE_WRITEBACK_RS2EN
-        assign    writeback_rs2_en[i] = (((issue_queue_valid[i] && (wb_alu_dst_Paddr == issue_queue_Prs2[i]) && issue_queue_Prs2_valid[i]) || (wb_alu_in_writers2 && fifo_p[i])) && wb_alu_valid)   ||
-                                        (((issue_queue_valid[i] && (wb_div_dst_Paddr == issue_queue_Prs2[i]) && issue_queue_Prs2_valid[i]) || (wb_div_in_writers2 && fifo_p[i])) && wb_div_valid)   ||
-                                        (((issue_queue_valid[i] && (wb_mul_dst_Paddr == issue_queue_Prs2[i]) && issue_queue_Prs2_valid[i]) || (wb_mul_in_writers2 && fifo_p[i])) && wb_mul_valid)   ||
-                                        (((issue_queue_valid[i] && (wb_load_dst_Paddr== issue_queue_Prs2[i]) && issue_queue_Prs2_valid[i]) || (wb_load_in_writers2&& fifo_p[i])) && wb_load_valid)  ||
-                                        (((issue_queue_valid[i] && (wb_br_rob        == issue_queue_Prs2[i]) && issue_queue_Prs2_valid[i]) || (wb_br_in_writers2  && fifo_p[i])) && wb_br_out_valid)||
-                                        (((issue_queue_valid[i] && (wb_csr_dst_Paddr == issue_queue_Prs2[i]) && issue_queue_Prs2_valid[i]) || (wb_csr_in_writers2 && fifo_p[i])) && wb_csr_valid);
-    end
-endgenerate
-
-generate
-    for (i=0; i<`ISSUE_QUEUE_DEPTH; i++) begin: GENERATE_ISSUE_WRITEBACK_RS2DATA
-        assign    writeback_rs2_data[i] =   ((((wb_alu_dst_Paddr == issue_queue_Prs2[i]) && issue_queue_Prs2_valid[i]) || (wb_alu_in_writers2 && fifo_p[i])) && wb_alu_valid    )?  wb_alu_out  :
-                                            ((((wb_div_dst_Paddr == issue_queue_Prs2[i]) && issue_queue_Prs2_valid[i]) || (wb_div_in_writers2 && fifo_p[i])) && wb_div_valid    )?  wb_div_out  :
-                                            ((((wb_mul_dst_Paddr == issue_queue_Prs2[i]) && issue_queue_Prs2_valid[i]) || (wb_mul_in_writers2 && fifo_p[i])) && wb_mul_valid    )?  wb_mul_out  :
-                                            ((((wb_load_dst_Paddr== issue_queue_Prs2[i]) && issue_queue_Prs2_valid[i]) || (wb_load_in_writers2&& fifo_p[i])) && wb_load_valid   )?  wb_load_data:
-                                            ((((wb_br_rob        == issue_queue_Prs2[i]) && issue_queue_Prs2_valid[i]) || (wb_br_in_writers2  && fifo_p[i])) && wb_br_out_valid )?  wb_br_out   :
-                                            ((((wb_csr_dst_Paddr == issue_queue_Prs2[i]) && issue_queue_Prs2_valid[i]) || (wb_csr_in_writers2 && fifo_p[i])) && wb_csr_valid    )?  wb_csr_data :   'b0;
-    end
-endgenerate
-
 // -------------------------------------------------------------------------------------------------------------
 // fifo_p: "1" means the next clock to write
 always @(posedge clk or negedge rst_n) begin
@@ -218,32 +158,16 @@ generate
         always @(posedge clk or negedge rst_n) begin
             if (!rst_n) begin
                 issue_queue_Prs1        [j] <= {$clog2(`ROB_DEPTH){1'b0}};
-                issue_queue_Prs2        [j] <= {$clog2(`ROB_DEPTH){1'b0}};
                 issue_queue_Pdst        [j] <= {$clog2(`ROB_DEPTH){1'b0}};
-                issue_queue_op          [j] <= {OP_WIDTH{1'b0}};
-                issue_queue_pc          [j] <= `PC_WIDTH'b0;
-                issue_queue_imm         [j] <= `WORD_WIDTH'b0;
             end else if (fifo_write_en && fifo_p[j] && !(fifo_issue_en && (issue_tag<=j))) begin    // only write in [j]
                 issue_queue_Prs1        [j] <= rs1_Paddr;
-                issue_queue_Prs2        [j] <= rs2_Paddr;
                 issue_queue_Pdst        [j] <= id_alloc_rob;
-                issue_queue_op          [j] <= id_op;
-                issue_queue_pc          [j] <= id_pc;
-                issue_queue_imm         [j] <= id_imm;
             end else if (fifo_write_en && fifo_p[j+1] && fifo_issue_en && (issue_tag<=j)) begin   // write in [j+1] and issue
                 issue_queue_Prs1        [j] <= rs1_Paddr;
-                issue_queue_Prs2        [j] <= rs2_Paddr;
                 issue_queue_Pdst        [j] <= id_alloc_rob;
-                issue_queue_op          [j] <= id_op;
-                issue_queue_pc          [j] <= id_pc;
-                issue_queue_imm         [j] <= id_imm;
             end else if (fifo_issue_en && (issue_tag<=j)) begin                                   // only issue, compressed
                 issue_queue_Prs1        [j] <= issue_queue_Prs1     [j+1];
-                issue_queue_Prs2        [j] <= issue_queue_Prs2     [j+1];
                 issue_queue_Pdst        [j] <= issue_queue_Pdst     [j+1];
-                issue_queue_op          [j] <= issue_queue_op       [j+1];
-                issue_queue_pc          [j] <= issue_queue_pc       [j+1];
-                issue_queue_imm         [j] <= issue_queue_imm      [j+1];
             end                                                                 // not write and not issue, hold
         end
     end
@@ -253,25 +177,13 @@ endgenerate
 always @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
         issue_queue_Prs1        [`ISSUE_QUEUE_DEPTH-1] <= {$clog2(`ROB_DEPTH){1'b0}};
-        issue_queue_Prs2        [`ISSUE_QUEUE_DEPTH-1] <= {$clog2(`ROB_DEPTH){1'b0}};
         issue_queue_Pdst        [`ISSUE_QUEUE_DEPTH-1] <= {$clog2(`ROB_DEPTH){1'b0}};
-        issue_queue_op          [`ISSUE_QUEUE_DEPTH-1] <= {OP_WIDTH{1'b0}};
-        issue_queue_pc          [`ISSUE_QUEUE_DEPTH-1] <= `PC_WIDTH'b0;
-        issue_queue_imm         [`ISSUE_QUEUE_DEPTH-1] <= `WORD_WIDTH'b0;
     end else if (fifo_write_en && fifo_p[`ISSUE_QUEUE_DEPTH-1] && !fifo_issue_en) begin  // write in
         issue_queue_Prs1        [`ISSUE_QUEUE_DEPTH-1] <= rs1_Paddr;
-        issue_queue_Prs2        [`ISSUE_QUEUE_DEPTH-1] <= rs2_Paddr;
         issue_queue_Pdst        [`ISSUE_QUEUE_DEPTH-1] <= id_alloc_rob;
-        issue_queue_op          [`ISSUE_QUEUE_DEPTH-1] <= id_op;
-        issue_queue_pc          [`ISSUE_QUEUE_DEPTH-1] <= id_pc;
-        issue_queue_imm         [`ISSUE_QUEUE_DEPTH-1] <= id_imm;
     end else if (fifo_issue_en) begin
         issue_queue_Prs1        [`ISSUE_QUEUE_DEPTH-1] <= {$clog2(`ROB_DEPTH){1'b0}};
-        issue_queue_Prs2        [`ISSUE_QUEUE_DEPTH-1] <= {$clog2(`ROB_DEPTH){1'b0}};
         issue_queue_Pdst        [`ISSUE_QUEUE_DEPTH-1] <= {$clog2(`ROB_DEPTH){1'b0}};
-        issue_queue_op          [`ISSUE_QUEUE_DEPTH-1] <= {OP_WIDTH{1'b0}};
-        issue_queue_pc          [`ISSUE_QUEUE_DEPTH-1] <= `PC_WIDTH'b0;
-        issue_queue_imm         [`ISSUE_QUEUE_DEPTH-1] <= `WORD_WIDTH'b0;
     end
 end
 //------------------------Prs1_valid=0 means data1 ready--------------------------------------------------------
@@ -314,48 +226,10 @@ always @(posedge clk or negedge rst_n) begin
         issue_queue_rs1_value   [`ISSUE_QUEUE_DEPTH-1]  <= writeback_rs1_data[`ISSUE_QUEUE_DEPTH-1];
     end                                                                             // not write, hold
 end
-
-//------------------------Prs2_valid=0 means data2 ready--------------------------------------------------------------
-generate
-    for (j=0; j<`ISSUE_QUEUE_DEPTH-1; j++) begin: GENERATE_RATRS2VALID
-        always @(posedge clk or negedge rst_n) begin
-             if (!rst_n) begin
-                issue_queue_Prs2_valid[j]   <= 1'b0;
-            end else if (writeback_rs2_en[j] && !(fifo_issue_en && (issue_tag<=j))) begin        // writeback in [j] without issue
-                issue_queue_Prs2_valid[j]   <= 1'b0;
-                issue_queue_rs2_value[j]    <= writeback_rs2_data[j];
-            end else if (writeback_rs2_en[j+1] && (fifo_issue_en && (issue_tag<=j))) begin  // writeback in [j+1] and issue
-                issue_queue_Prs2_valid[j]   <= 1'b0;
-                issue_queue_rs2_value[j]    <= writeback_rs2_data[j+1];
-            end else if (fifo_write_en && fifo_p[j] && !fifo_issue_en) begin                // write in [j] without issue
-                issue_queue_Prs2_valid[j]   <= rs2_rat_valid;
-                issue_queue_rs2_value[j]    <= rs2_value_fromGPR;
-            end else if (fifo_write_en && fifo_p[j+1] && fifo_issue_en) begin               // write in [j+1] and issue
-                issue_queue_Prs2_valid[j]   <= rs2_rat_valid;
-                issue_queue_rs2_value[j]    <= rs2_value_fromGPR;
-            end else if (fifo_issue_en && (issue_tag<=j)) begin                             // only issue
-                issue_queue_Prs2_valid[j]   <= issue_queue_Prs2_valid  [j+1];
-                issue_queue_rs2_value[j]    <= issue_queue_rs2_value[j+1];
-            end
-        end
-    end
-endgenerate
-// when issue, issue_queue[`ISSUE_QUEUE_DEPTH-1] stays the same, because it's valid = 0.
-always @(posedge clk or negedge rst_n) begin
-    if (!rst_n) begin
-        issue_queue_Prs2_valid  [`ISSUE_QUEUE_DEPTH-1]  <= 1'b0;
-    end else if (fifo_write_en && fifo_p[`ISSUE_QUEUE_DEPTH-1] && !fifo_issue_en) begin      // only write in [`ISSUE_QUEUE_DEPTH-1]
-        issue_queue_Prs2_valid  [`ISSUE_QUEUE_DEPTH-1]  <= rs2_rat_valid;
-        issue_queue_rs2_value   [`ISSUE_QUEUE_DEPTH-1]  <= rs2_value_fromGPR;
-    end else if (writeback_rs2_en[`ISSUE_QUEUE_DEPTH-1]) begin                      // writeback in [`ISSUE_QUEUE_DEPTH-1]
-        issue_queue_Prs2_valid  [`ISSUE_QUEUE_DEPTH-1]  <= 1'b0;
-        issue_queue_rs2_value   [`ISSUE_QUEUE_DEPTH-1]  <= writeback_rs2_data[`ISSUE_QUEUE_DEPTH-1];
-    end                                                                                 // not write, hold
-end
 //------------------------------------issue_queue_ready---------------------------------------------------------
 generate
     for (j=0; j<`ISSUE_QUEUE_DEPTH; j++) begin: GENERATE_READY
-        assign issue_queue_ready[j] = !issue_queue_Prs1_valid[j] && !issue_queue_Prs2_valid[j];
+        assign issue_queue_ready[j] = !issue_queue_Prs1_valid[j];
     end
 endgenerate
 

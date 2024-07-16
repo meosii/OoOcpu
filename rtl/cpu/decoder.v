@@ -29,19 +29,15 @@ module decoder (
     output wire                                 mret_en,
  
     // exception
-    output wire [`DATA_WIDTH_ISA_EXP - 1 : 0]   exp_code
+    output wire [`DATA_WIDTH_ISA_EXP - 1 : 0]   exp_code,
 
-
-//    //csr to gpr
-//    output reg [`WORD_WIDTH - 1 : 0]            csr_to_gpr_data,
-//    //to csr
-//    output reg                                  csr_rd_en,
-//    output reg [`CSR_ADDR_WIDTH - 1 :0]         csr_rd_addr,
-//    output reg                                  csr_w_en,
-//    output reg [`CSR_ADDR_WIDTH - 1 :0]         csr_w_addr,
-//    output reg [`WORD_WIDTH - 1 : 0]            csr_w_data,
-//    //from csr
-//    input wire [`WORD_WIDTH - 1 : 0]            csr_rd_data,
+    //csr to rob
+    output reg                                  csr_rd_en,
+    output reg [`CSR_ADDR_WIDTH - 1 : 0]        csr_rd_addr,
+    output reg                                  csr_w_en,
+    output reg [`CSR_ADDR_WIDTH - 1 : 0]        csr_w_addr,
+    output wire [`DATA_WIDTH_CSR_OP-1 : 0]      csr_op,
+    output wire [4:0]                           csr_uimm
 );
 
 localparam SIGN_PC_WIDTH = `PC_WIDTH + 1;
@@ -113,84 +109,76 @@ always @(*) begin
     endcase
 end
 
-//always @(*) begin
-//    if (opcode == `OP_SYSTEM) begin
-//        case (if_insn[`I_TYPE_FUNCT3])
-//            `FUNCT3_CSRRW: begin //t = CSRs[csr]; CSRs[csr] = x[rs1]; x[rd] = t
-//                csr_rd_en       = (if_en)? `ENABLE : `DISABLE;
-//                csr_rd_addr     = imm[`CSR_ADDR_WIDTH - 1 : 0];
-//                csr_w_en        = (if_en && rs1_data_valid)? `ENABLE : `DISABLE;
-//                csr_w_addr      = imm[`CSR_ADDR_WIDTH - 1 : 0];
-//                csr_w_data      = rs1_data;
-//                csr_to_gpr_data = csr_rd_data;
-//            end
-//            `FUNCT3_CSRRS: begin //t = CSRs[csr]; CSRs[csr] = t | x[rs1]; x[rd] = t
-//                csr_rd_en       = (if_en)? `ENABLE : `DISABLE;
-//                csr_rd_addr     = imm[`CSR_ADDR_WIDTH - 1 : 0];
-//                csr_w_en        = (if_en && rs1_data_valid)? `ENABLE : `DISABLE;
-//                csr_w_addr      = imm[`CSR_ADDR_WIDTH - 1 : 0];
-//                csr_w_data      = csr_rd_data | rs1_data;
-//                csr_to_gpr_data = csr_rd_data;
-//            end
-//            `FUNCT3_CSRRC: begin //t = CSRs[csr]; CSRs[csr] = t &~x[rs1]; x[rd] = t
-//                csr_rd_en       = (if_en)? `ENABLE : `DISABLE;
-//                csr_rd_addr     = imm[`CSR_ADDR_WIDTH - 1 : 0];
-//                csr_w_en        = (if_en && rs1_data_valid)? `ENABLE : `DISABLE;
-//                csr_w_addr      = imm[`CSR_ADDR_WIDTH - 1 : 0];
-//                csr_w_data      = csr_rd_data & ~rs1_data;
-//                csr_to_gpr_data = csr_rd_data;
-//            end
-//            `FUNCT3_CSRRWI: begin //x[rd] = CSRs[csr]; CSRs[csr] = zimm
-//                csr_rd_en       = (if_en)? `ENABLE : `DISABLE;
-//                csr_rd_addr     = imm[`CSR_ADDR_WIDTH - 1 : 0];
-//                csr_w_en        = (if_en)? `ENABLE : `DISABLE;
-//                csr_w_addr      = imm[`CSR_ADDR_WIDTH - 1 : 0];
-//                csr_w_data      = {27'b0,if_insn[`I_TYPE_RS1]};
-//                csr_to_gpr_data = csr_rd_data;
-//            end
-//            `FUNCT3_CSRRSI: begin //t = CSRs[csr]; CSRs[csr] = t | zimm; x[rd] = t
-//                csr_rd_en       = (if_en)? `ENABLE : `DISABLE;
-//                csr_rd_addr     = imm[`CSR_ADDR_WIDTH - 1 : 0];
-//                csr_w_en        = (if_en)? `ENABLE : `DISABLE;
-//                csr_w_addr      = imm[`CSR_ADDR_WIDTH - 1 : 0];
-//                csr_w_data      = csr_rd_data | {27'b0,if_insn[`I_TYPE_RS1]};
-//                csr_to_gpr_data = csr_rd_data;
-//            end
-//            `FUNCT3_CSRRCI: begin //t = CSRs[csr]; CSRs[csr] = t &~zimm; x[rd] = t
-//                csr_rd_en       = (if_en)? `ENABLE : `DISABLE;
-//                csr_rd_addr     = imm[`CSR_ADDR_WIDTH - 1 : 0];
-//                csr_w_en        = (if_en)? `ENABLE : `DISABLE;
-//                csr_w_addr      = imm[`CSR_ADDR_WIDTH - 1 : 0];
-//                csr_w_data      = csr_rd_data & ~{27'b0,if_insn[`I_TYPE_RS1]};
-//                csr_to_gpr_data = csr_rd_data;
-//            end
-//            `FUNCT3_ECALL_EBREAK: begin // deal in csr
-//                csr_rd_en       = `DISABLE;
-//                csr_rd_addr     = `CSR_ADDR_WIDTH'b0;
-//                csr_w_en        = `DISABLE;
-//                csr_w_addr      = `CSR_ADDR_WIDTH'b0;
-//                csr_w_data      = `WORD_WIDTH'b0;
-//                csr_to_gpr_data = `WORD_WIDTH'b0; // rd_addr = 5'b00000;
-//            end
-//            default: begin
-//                csr_rd_en       = `DISABLE;
-//                csr_rd_addr     = `CSR_ADDR_WIDTH'b0;
-//                csr_w_en        = `DISABLE;
-//                csr_w_addr      = `CSR_ADDR_WIDTH'b0;
-//                csr_w_data      = `WORD_WIDTH'b0;
-//                csr_to_gpr_data = `WORD_WIDTH'b0;
-//            end
-//        endcase
-//    end else begin
-//        csr_rd_en       = `DISABLE;
-//        csr_rd_addr     = `CSR_ADDR_WIDTH'b0;
-//        csr_w_en        = `DISABLE;
-//        csr_w_addr      = `CSR_ADDR_WIDTH'b0;
-//        csr_w_data      = `WORD_WIDTH'b0;
-//        csr_to_gpr_data = `WORD_WIDTH'b0;
-//    end
-//end
+always @(*) begin
+    if (opcode == `OP_SYSTEM) begin
+        case (if_insn[`I_TYPE_FUNCT3])
+            `FUNCT3_CSRRW: begin //t = CSRs[csr]; CSRs[csr] = x[rs1]; x[rd] = t
+                csr_rd_en       = (if_en)? `ENABLE : `DISABLE;
+                csr_rd_addr     = imm[`CSR_ADDR_WIDTH - 1 : 0];
+                csr_w_en        = (if_en)? `ENABLE : `DISABLE;
+                csr_w_addr      = imm[`CSR_ADDR_WIDTH - 1 : 0];
+            end
+            `FUNCT3_CSRRS: begin //t = CSRs[csr]; CSRs[csr] = t | x[rs1]; x[rd] = t
+                csr_rd_en       = (if_en)? `ENABLE : `DISABLE;
+                csr_rd_addr     = imm[`CSR_ADDR_WIDTH - 1 : 0];
+                csr_w_en        = (if_en)? `ENABLE : `DISABLE;
+                csr_w_addr      = imm[`CSR_ADDR_WIDTH - 1 : 0];
+            end
+            `FUNCT3_CSRRC: begin //t = CSRs[csr]; CSRs[csr] = t &~x[rs1]; x[rd] = t
+                csr_rd_en       = (if_en)? `ENABLE : `DISABLE;
+                csr_rd_addr     = imm[`CSR_ADDR_WIDTH - 1 : 0];
+                csr_w_en        = (if_en)? `ENABLE : `DISABLE;
+                csr_w_addr      = imm[`CSR_ADDR_WIDTH - 1 : 0];
+            end
+            `FUNCT3_CSRRWI: begin //x[rd] = CSRs[csr]; CSRs[csr] = zimm
+                csr_rd_en       = (if_en)? `ENABLE : `DISABLE;
+                csr_rd_addr     = imm[`CSR_ADDR_WIDTH - 1 : 0];
+                csr_w_en        = (if_en)? `ENABLE : `DISABLE;
+                csr_w_addr      = imm[`CSR_ADDR_WIDTH - 1 : 0];
+            end
+            `FUNCT3_CSRRSI: begin //t = CSRs[csr]; CSRs[csr] = t | zimm; x[rd] = t
+                csr_rd_en       = (if_en)? `ENABLE : `DISABLE;
+                csr_rd_addr     = imm[`CSR_ADDR_WIDTH - 1 : 0];
+                csr_w_en        = (if_en)? `ENABLE : `DISABLE;
+                csr_w_addr      = imm[`CSR_ADDR_WIDTH - 1 : 0];
+            end
+            `FUNCT3_CSRRCI: begin //t = CSRs[csr]; CSRs[csr] = t &~zimm; x[rd] = t
+                csr_rd_en       = (if_en)? `ENABLE : `DISABLE;
+                csr_rd_addr     = imm[`CSR_ADDR_WIDTH - 1 : 0];
+                csr_w_en        = (if_en)? `ENABLE : `DISABLE;
+                csr_w_addr      = imm[`CSR_ADDR_WIDTH - 1 : 0];
+            end
+            `FUNCT3_ECALL_EBREAK: begin // deal in csr
+                csr_rd_en       = `DISABLE;
+                csr_rd_addr     = `CSR_ADDR_WIDTH'b0;
+                csr_w_en        = `DISABLE;
+                csr_w_addr      = `CSR_ADDR_WIDTH'b0;
+            end
+            default: begin
+                csr_rd_en       = `DISABLE;
+                csr_rd_addr     = `CSR_ADDR_WIDTH'b0;
+                csr_w_en        = `DISABLE;
+                csr_w_addr      = `CSR_ADDR_WIDTH'b0;
+            end
+        endcase
+    end else begin
+        csr_rd_en       = `DISABLE;
+        csr_rd_addr     = `CSR_ADDR_WIDTH'b0;
+        csr_w_en        = `DISABLE;
+        csr_w_addr      = `CSR_ADDR_WIDTH'b0;
+    end
+end
 
+assign csr_op = (opcode != `OP_SYSTEM                           )? `CSR_OP_NOP          :
+                (if_insn[`I_TYPE_FUNCT3] == `FUNCT3_CSRRW       )? `CSR_OP_CSRRW        :
+                (if_insn[`I_TYPE_FUNCT3] == `FUNCT3_CSRRS       )? `CSR_OP_CSRRS        :
+                (if_insn[`I_TYPE_FUNCT3] == `FUNCT3_CSRRC       )? `CSR_OP_CSRRC        :
+                (if_insn[`I_TYPE_FUNCT3] == `FUNCT3_CSRRWI      )? `CSR_OP_CSRRWI       :
+                (if_insn[`I_TYPE_FUNCT3] == `FUNCT3_CSRRSI      )? `CSR_OP_CSRRSI       :
+                (if_insn[`I_TYPE_FUNCT3] == `FUNCT3_CSRRCI      )? `CSR_OP_CSRRCI       :
+                (if_insn[`I_TYPE_FUNCT3] == `FUNCT3_ECALL_EBREAK)? `CSR_OP_ECALL_EBREAK :   `CSR_OP_NOP;
+
+assign csr_uimm = if_insn[`I_TYPE_RS1];
 
 
 assign alu_op = (!if_en)? `ALU_OP_NOP :

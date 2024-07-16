@@ -13,14 +13,14 @@ module pc (
     // cpu_ctrl
     input wire [`PC_WIDTH-1 : 0]            ctrl_pc,
     input wire                              trap_happened,
-    input wire                              mret_en, // from decoder
+    input wire [2:0]                        rob_commit_ebreak_ecall_mret,
     output reg [`PC_WIDTH-1 : 0]            pc
 );
 always @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
         pc <= `PC_WIDTH'b0;
     end else if (cpu_en) begin
-        if (trap_happened || mret_en) begin
+        if (trap_happened || rob_commit_ebreak_ecall_mret[0]) begin
             pc <= ctrl_pc;
         end else if (br_taken) begin
             pc <= br_addr;

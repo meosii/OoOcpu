@@ -20,7 +20,7 @@ module rat(
     input wire                              rob_alloc_dst_wen_2rat,   // whether write
 
     // from rob commit
-    input wire                              commit_en,
+    input wire                              commit_dst_en,
     input wire [`GPR_ADDR_WIDTH-1 : 0]      rob_commit_dst_addr_2rat,   // Aaddr
     input wire [$clog2(`ROB_DEPTH)-1 : 0]   rob_commit_Paddr,           // Paddr
     // branch
@@ -35,8 +35,7 @@ module rat(
     output wire                             rs2_rat_valid,
     output wire [$clog2(`ROB_DEPTH)-1 : 0]  rs2_Paddr,
     // jump
-    output wire                             jp_rs1_rat_valid,
-    output wire [$clog2(`ROB_DEPTH)-1 : 0]  jp_rs1_Paddr
+    output wire                             jp_rs1_rat_valid
 );
 
 reg [$clog2(`ROB_DEPTH)-1 : 0]  rat_Paddr   [31 : 0];
@@ -54,7 +53,7 @@ generate for (i=0; i<32; i++) begin: GENERATE_RAT
         end else if (allocate_en && (rob_alloc_dst_addr_2rat==i) && rob_alloc_dst_wen_2rat) begin
             rat_Paddr[i] <=  rob_alloc_tag_2rat;
             rat_valid[i] <= 1'b1;    // now has mapping between A and P
-        end else if (commit_en && (rob_commit_dst_addr_2rat==i) && (rob_commit_Paddr == rat_Paddr[i])) begin
+        end else if (commit_dst_en && (rob_commit_dst_addr_2rat==i) && (rob_commit_Paddr == rat_Paddr[i])) begin
             rat_Paddr[i] <=  'b0;
             rat_valid[i] <= 1'b0;    // not mapping between A and P
         end
@@ -69,7 +68,6 @@ assign rs2_rat_valid    = (id_rs2_addr == 'b0)? 1'b0 : rat_valid[id_rs2_addr];
 assign rs2_Paddr        = (id_rs2_addr == 'b0)? 'b0 : rat_Paddr[id_rs2_addr];
 
 assign jp_rs1_rat_valid = (jp_rs1_addr == 'b0)? 1'b0 : rat_valid[jp_rs1_addr];
-assign jp_rs1_Paddr     = (jp_rs1_addr == 'b0)? 'b0 : rat_Paddr[jp_rs1_addr];
 
 endmodule
 `endif

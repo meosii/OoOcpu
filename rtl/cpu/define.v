@@ -10,9 +10,10 @@
 `define DATA_WIDTH_MEM_OP   4
 `define DATA_WIDTH_BR_OP    4
 `define DATA_WIDTH_CTRL_OP  2
+`define DATA_WIDTH_CSR_OP   3
 `define DATA_WIDTH_ISA_EXP  5
 
-`define ISSUE_QUEUE_DEPTH       4   // cannot change in issue_queue
+`define ISSUE_QUEUE_DEPTH   4   // cannot change in issue_queue
 
 `define DATA_WIDTH_OFFSET   2
 // In memory, each address stores 8 bits(1 byte),
@@ -141,6 +142,15 @@
 `define MEM_OP_SW           4'd6
 `define MEM_OP_SH           4'd7
 `define MEM_OP_SB           4'd8
+
+`define CSR_OP_NOP          3'd0
+`define CSR_OP_CSRRW        3'd1
+`define CSR_OP_CSRRS        3'd2
+`define CSR_OP_CSRRC        3'd3
+`define CSR_OP_CSRRWI       3'd4
+`define CSR_OP_CSRRSI       3'd5
+`define CSR_OP_CSRRCI       3'd6
+`define CSR_OP_ECALL_EBREAK 3'd7   
 
 // used in fu_top
 `define MUL_OP_NOP          3'd0

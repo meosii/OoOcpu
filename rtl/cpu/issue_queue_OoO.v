@@ -41,6 +41,10 @@ module issue_queue_OoO #(
     input wire [$clog2(`ROB_DEPTH)-1 : 0]       wb_br_rob,
     input wire [`WORD_WIDTH-1 : 0]              wb_br_out,                  // jal and jalr: rd = pc+4
     input wire                                  wb_br_out_valid,
+        // from csr
+    input wire [$clog2(`ROB_DEPTH)-1 : 0]       wb_csr_dst_Paddr,
+    input wire [`WORD_WIDTH - 1 : 0]            wb_csr_data,
+    input wire                                  wb_csr_valid,
     // branch and exception
     input wire                                  rob_commit_br_taken,    // branch -> refresh the issue_queue
     input wire                                  rob_commit_exp_en,          // exp -> refresh the issue_queue
@@ -136,6 +140,8 @@ wire                        wb_load_in_writers1;
 wire                        wb_load_in_writers2;
 wire                        wb_br_in_writers1;
 wire                        wb_br_in_writers2;
+wire                        wb_csr_in_writers1;
+wire                        wb_csr_in_writers2;
 
 assign wb_alu_in_writers1   = (wb_alu_dst_Paddr == rs1_Paddr)   && rs1_rat_valid && fifo_write_en;
 assign wb_alu_in_writers2   = (wb_alu_dst_Paddr == rs2_Paddr)   && rs2_rat_valid && fifo_write_en;
@@ -147,6 +153,8 @@ assign wb_load_in_writers1  = (wb_load_dst_Paddr== rs1_Paddr)   && rs1_rat_valid
 assign wb_load_in_writers2  = (wb_load_dst_Paddr== rs2_Paddr)   && rs2_rat_valid && fifo_write_en;
 assign wb_br_in_writers1    = (wb_br_rob        == rs1_Paddr)   && rs1_rat_valid && fifo_write_en;
 assign wb_br_in_writers2    = (wb_br_rob        == rs2_Paddr)   && rs2_rat_valid && fifo_write_en;
+assign wb_csr_in_writers1   = (wb_csr_dst_Paddr == rs1_Paddr)   && rs1_rat_valid && fifo_write_en;
+assign wb_csr_in_writers2   = (wb_csr_dst_Paddr == rs2_Paddr)   && rs2_rat_valid && fifo_write_en;
 
 genvar i;
     // rs1
@@ -156,17 +164,19 @@ generate
                                         (((issue_queue_valid[i] && (wb_div_dst_Paddr == issue_queue_Prs1[i]) && issue_queue_Prs1_valid[i]) || (wb_div_in_writers1 && fifo_p[i])) && wb_div_valid)   ||
                                         (((issue_queue_valid[i] && (wb_mul_dst_Paddr == issue_queue_Prs1[i]) && issue_queue_Prs1_valid[i]) || (wb_mul_in_writers1 && fifo_p[i])) && wb_mul_valid)   ||
                                         (((issue_queue_valid[i] && (wb_load_dst_Paddr== issue_queue_Prs1[i]) && issue_queue_Prs1_valid[i]) || (wb_load_in_writers1&& fifo_p[i])) && wb_load_valid)  ||
-                                        (((issue_queue_valid[i] && (wb_br_rob        == issue_queue_Prs1[i]) && issue_queue_Prs1_valid[i]) || (wb_br_in_writers1  && fifo_p[i])) && wb_br_out_valid);
+                                        (((issue_queue_valid[i] && (wb_br_rob        == issue_queue_Prs1[i]) && issue_queue_Prs1_valid[i]) || (wb_br_in_writers1  && fifo_p[i])) && wb_br_out_valid)||
+                                        (((issue_queue_valid[i] && (wb_csr_dst_Paddr == issue_queue_Prs1[i]) && issue_queue_Prs1_valid[i]) || (wb_csr_in_writers1 && fifo_p[i])) && wb_csr_valid);
     end
 endgenerate
 
 generate
     for (i=0; i<`ISSUE_QUEUE_DEPTH; i++) begin: GENERATE_ISSUE_WRITEBACK_RS1DATA
-        assign    writeback_rs1_data[i] =   ((((wb_alu_dst_Paddr == issue_queue_Prs1[i]) && issue_queue_Prs1_valid[i]) || (wb_alu_in_writers1 && fifo_p[i])) && wb_alu_valid )?    wb_alu_out   :
-                                            ((((wb_div_dst_Paddr == issue_queue_Prs1[i]) && issue_queue_Prs1_valid[i]) || (wb_div_in_writers1 && fifo_p[i])) && wb_div_valid )?    wb_div_out   :
-                                            ((((wb_mul_dst_Paddr == issue_queue_Prs1[i]) && issue_queue_Prs1_valid[i]) || (wb_mul_in_writers1 && fifo_p[i])) && wb_mul_valid )?    wb_mul_out   :
-                                            ((((wb_load_dst_Paddr== issue_queue_Prs1[i]) && issue_queue_Prs1_valid[i]) || (wb_load_in_writers1&& fifo_p[i])) && wb_load_valid)?    wb_load_data :
-                                            ((((wb_br_rob        == issue_queue_Prs1[i]) && issue_queue_Prs1_valid[i]) || (wb_br_in_writers1  && fifo_p[i])) && wb_br_out_valid)?  wb_br_out    :   'b0;
+        assign    writeback_rs1_data[i] =   ((((wb_alu_dst_Paddr == issue_queue_Prs1[i]) && issue_queue_Prs1_valid[i]) || (wb_alu_in_writers1 && fifo_p[i])) && wb_alu_valid    )?  wb_alu_out  :
+                                            ((((wb_div_dst_Paddr == issue_queue_Prs1[i]) && issue_queue_Prs1_valid[i]) || (wb_div_in_writers1 && fifo_p[i])) && wb_div_valid    )?  wb_div_out  :
+                                            ((((wb_mul_dst_Paddr == issue_queue_Prs1[i]) && issue_queue_Prs1_valid[i]) || (wb_mul_in_writers1 && fifo_p[i])) && wb_mul_valid    )?  wb_mul_out  :
+                                            ((((wb_load_dst_Paddr== issue_queue_Prs1[i]) && issue_queue_Prs1_valid[i]) || (wb_load_in_writers1&& fifo_p[i])) && wb_load_valid   )?  wb_load_data:
+                                            ((((wb_br_rob        == issue_queue_Prs1[i]) && issue_queue_Prs1_valid[i]) || (wb_br_in_writers1  && fifo_p[i])) && wb_br_out_valid )?  wb_br_out   :
+                                            ((((wb_csr_dst_Paddr == issue_queue_Prs1[i]) && issue_queue_Prs1_valid[i]) || (wb_csr_in_writers1 && fifo_p[i])) && wb_csr_valid    )?  wb_csr_data :   'b0;
     end
 endgenerate
     // rs2
@@ -176,19 +186,22 @@ generate
                                         (((issue_queue_valid[i] && (wb_div_dst_Paddr == issue_queue_Prs2[i]) && issue_queue_Prs2_valid[i]) || (wb_div_in_writers2 && fifo_p[i])) && wb_div_valid)   ||
                                         (((issue_queue_valid[i] && (wb_mul_dst_Paddr == issue_queue_Prs2[i]) && issue_queue_Prs2_valid[i]) || (wb_mul_in_writers2 && fifo_p[i])) && wb_mul_valid)   ||
                                         (((issue_queue_valid[i] && (wb_load_dst_Paddr== issue_queue_Prs2[i]) && issue_queue_Prs2_valid[i]) || (wb_load_in_writers2&& fifo_p[i])) && wb_load_valid)  ||
-                                        (((issue_queue_valid[i] && (wb_br_rob        == issue_queue_Prs2[i]) && issue_queue_Prs2_valid[i]) || (wb_br_in_writers2  && fifo_p[i])) && wb_br_out_valid);
+                                        (((issue_queue_valid[i] && (wb_br_rob        == issue_queue_Prs2[i]) && issue_queue_Prs2_valid[i]) || (wb_br_in_writers2  && fifo_p[i])) && wb_br_out_valid)||
+                                        (((issue_queue_valid[i] && (wb_csr_dst_Paddr == issue_queue_Prs2[i]) && issue_queue_Prs2_valid[i]) || (wb_csr_in_writers2 && fifo_p[i])) && wb_csr_valid);
     end
 endgenerate
 
 generate
     for (i=0; i<`ISSUE_QUEUE_DEPTH; i++) begin: GENERATE_ISSUE_WRITEBACK_RS2DATA
-        assign    writeback_rs2_data[i] =   ((((wb_alu_dst_Paddr == issue_queue_Prs2[i]) && issue_queue_Prs2_valid[i]) || (wb_alu_in_writers2 && fifo_p[i])) && wb_alu_valid )?    wb_alu_out   :
-                                            ((((wb_div_dst_Paddr == issue_queue_Prs2[i]) && issue_queue_Prs2_valid[i]) || (wb_div_in_writers2 && fifo_p[i])) && wb_div_valid )?    wb_div_out   :
-                                            ((((wb_mul_dst_Paddr == issue_queue_Prs2[i]) && issue_queue_Prs2_valid[i]) || (wb_mul_in_writers2 && fifo_p[i])) && wb_mul_valid )?    wb_mul_out   :
-                                            ((((wb_load_dst_Paddr== issue_queue_Prs2[i]) && issue_queue_Prs2_valid[i]) || (wb_load_in_writers2&& fifo_p[i])) && wb_load_valid)?    wb_load_data :
-                                            ((((wb_br_rob        == issue_queue_Prs2[i]) && issue_queue_Prs2_valid[i]) || (wb_br_in_writers2  && fifo_p[i])) && wb_br_out_valid)?  wb_br_out    :   'b0;
+        assign    writeback_rs2_data[i] =   ((((wb_alu_dst_Paddr == issue_queue_Prs2[i]) && issue_queue_Prs2_valid[i]) || (wb_alu_in_writers2 && fifo_p[i])) && wb_alu_valid    )?  wb_alu_out  :
+                                            ((((wb_div_dst_Paddr == issue_queue_Prs2[i]) && issue_queue_Prs2_valid[i]) || (wb_div_in_writers2 && fifo_p[i])) && wb_div_valid    )?  wb_div_out  :
+                                            ((((wb_mul_dst_Paddr == issue_queue_Prs2[i]) && issue_queue_Prs2_valid[i]) || (wb_mul_in_writers2 && fifo_p[i])) && wb_mul_valid    )?  wb_mul_out  :
+                                            ((((wb_load_dst_Paddr== issue_queue_Prs2[i]) && issue_queue_Prs2_valid[i]) || (wb_load_in_writers2&& fifo_p[i])) && wb_load_valid   )?  wb_load_data:
+                                            ((((wb_br_rob        == issue_queue_Prs2[i]) && issue_queue_Prs2_valid[i]) || (wb_br_in_writers2  && fifo_p[i])) && wb_br_out_valid )?  wb_br_out   :
+                                            ((((wb_csr_dst_Paddr == issue_queue_Prs2[i]) && issue_queue_Prs2_valid[i]) || (wb_csr_in_writers2 && fifo_p[i])) && wb_csr_valid    )?  wb_csr_data :   'b0;
     end
 endgenerate
+
 
 // -------------------------------------------------------------------------------------------------------------
 // fifo_p: "1" means the next clock to write
@@ -249,8 +262,8 @@ always @(posedge clk or negedge rst_n) begin
         issue_queue_Prs2        [`ISSUE_QUEUE_DEPTH-1] <= {$clog2(`ROB_DEPTH){1'b0}};
         issue_queue_Pdst        [`ISSUE_QUEUE_DEPTH-1] <= {$clog2(`ROB_DEPTH){1'b0}};
         issue_queue_op          [`ISSUE_QUEUE_DEPTH-1] <= {OP_WIDTH{1'b0}};
-        issue_queue_Pdst        [`ISSUE_QUEUE_DEPTH-1] <= {$clog2(`ROB_DEPTH){1'b0}};
-        issue_queue_op          [`ISSUE_QUEUE_DEPTH-1] <= {OP_WIDTH{1'b0}};
+        issue_queue_pc          [`ISSUE_QUEUE_DEPTH-1] <= `PC_WIDTH'b0;
+        issue_queue_imm         [`ISSUE_QUEUE_DEPTH-1] <= `WORD_WIDTH'b0;
     end else if (fifo_write_en && fifo_p[`ISSUE_QUEUE_DEPTH-1] && !fifo_issue_en) begin  // write in
         issue_queue_Prs1        [`ISSUE_QUEUE_DEPTH-1] <= rs1_Paddr;
         issue_queue_Prs2        [`ISSUE_QUEUE_DEPTH-1] <= rs2_Paddr;

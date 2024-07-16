@@ -15,6 +15,7 @@ module id_reg(
     input wire [`DATA_WIDTH_ALU_OP - 1 : 0]     alu_op, 
     input wire [`DATA_WIDTH_MEM_OP-1 :0]        mem_op,
     input wire [`DATA_WIDTH_BR_OP-1 :0]         br_op,
+    input wire [`DATA_WIDTH_CSR_OP - 1 : 0]     csr_op,
     input wire [`WORD_WIDTH-1 : 0]              imm,
     input wire [$clog2(`ROB_DEPTH)-1 : 0]       alloc_rob,
     // from rat
@@ -31,6 +32,7 @@ module id_reg(
     output reg [`DATA_WIDTH_ALU_OP - 1 : 0]     id_alu_op, 
     output reg [`DATA_WIDTH_MEM_OP-1 :0]        id_mem_op,
     output reg [`DATA_WIDTH_BR_OP-1 :0]         id_br_op,
+    output reg [`DATA_WIDTH_CSR_OP - 1 : 0]     id_csr_op,
     output reg [`WORD_WIDTH-1 : 0]              id_imm,
     output reg [$clog2(`ROB_DEPTH)-1 : 0]       id_alloc_rob,
     output reg                                  id_en,
@@ -51,6 +53,7 @@ always @(posedge clk or negedge rst_n) begin
         id_alu_op           <=  `DATA_WIDTH_ALU_OP'b0;
         id_mem_op           <=  `DATA_WIDTH_MEM_OP'b0;
         id_br_op            <=  `DATA_WIDTH_BR_OP'b0;
+        id_csr_op           <=  `DATA_WIDTH_CSR_OP'b0;
         id_imm              <=  `WORD_WIDTH'b0;
         id_alloc_rob        <=  {$clog2(`ROB_DEPTH){1'b0}};
         id_rs1_rat_valid    <=  1'b0;
@@ -68,6 +71,7 @@ always @(posedge clk or negedge rst_n) begin
             id_alu_op           <=  `DATA_WIDTH_ALU_OP'b0;
             id_mem_op           <=  `DATA_WIDTH_MEM_OP'b0;
             id_br_op            <=  `DATA_WIDTH_BR_OP'b0;
+            id_csr_op           <=  `DATA_WIDTH_CSR_OP'b0;
             id_imm              <=  `WORD_WIDTH'b0;
             id_alloc_rob        <=  {$clog2(`ROB_DEPTH){1'b0}};
             id_rs1_rat_valid    <=  1'b0;
@@ -84,6 +88,7 @@ always @(posedge clk or negedge rst_n) begin
             id_alu_op           <=  alu_op;
             id_mem_op           <=  mem_op;
             id_br_op            <=  br_op;
+            id_csr_op           <=  csr_op;
             id_imm              <=  imm;
             id_alloc_rob        <=  alloc_rob;
             id_rs1_rat_valid    <=  rs1_rat_valid;
