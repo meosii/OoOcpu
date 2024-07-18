@@ -386,8 +386,8 @@ rob u_rob(
 rat u_rat(
     .clk                        (clk                        ),
     .rst_n                      (rst_n                      ),
-    .id_rs1_addr                (rs1_addr                   ),
-    .id_rs2_addr                (rs2_addr                   ),
+    .rs1_addr                   (rs1_addr                   ),
+    .rs2_addr                   (rs2_addr                   ),
     .jp_rs1_addr                (jp_rs1_addr                ),
     .allocate_en                (allocate_en                ),
     .rob_alloc_tag_2rat         (rob_alloc_tag_2rat         ),

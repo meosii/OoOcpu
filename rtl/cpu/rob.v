@@ -157,7 +157,7 @@ assign rob_flush        = rob_commit_br_taken || rob_commit_exp_en;
 assign alloc_rob        = wptr[$clog2(`ROB_DEPTH)-1 : 0];
 assign rob_commit_Paddr = rptr[$clog2(`ROB_DEPTH)-1 : 0];
 
-assign wptr_next =  (rob_flush  )?  rob_commit_Paddr+1:
+assign wptr_next =  (rob_flush  )?  rptr + 1    :
                     (allocate_en)?  wptr + 1    :   wptr;
 
 assign rptr_next =  (retire_en)? rptr + 1   :   rptr;
@@ -175,7 +175,8 @@ assign rob_alloc_dst_wen_2rat = dst_wen;
 assign retire_en                    =  (rob_dst_value_ready [rob_commit_Paddr]  || 
                                         rob_store_ready     [rob_commit_Paddr]  ||
                                         rob_branch_ready    [rob_commit_Paddr]  ||
-                                        rob_csr_ready       [rob_commit_Paddr]      )   &&  !rob_empty;
+                                        rob_csr_ready       [rob_commit_Paddr]  ||
+                                        rob_exp_en          [rob_commit_Paddr]  )   &&  !rob_empty;
 assign rob_commit_pc                =   rob_pc              [rob_commit_Paddr]  ;
 assign rob_commit_dst_addr_2rat     =   rob_dst_addr        [rob_commit_Paddr]  ;
 assign rob_commit_br_taken          =   rob_br_taken        [rob_commit_Paddr]  ;
@@ -199,6 +200,19 @@ generate
     for (i=0; i<`ROB_DEPTH; i++) begin: GENERATE_ROB_INITAL
         always @(posedge clk or negedge rst_n) begin
             if (!rst_n) begin
+                rob_pc          [i]     <= `PC_WIDTH'b0;
+                rob_dst_addr    [i]     <= 'b0;
+                rob_dst_wen     [i]     <= 'b0;
+                rob_rs1_addr    [i]     <= 'b0; 
+                rob_rs2_addr    [i]     <= 'b0; 
+                rob_csr_rd_en   [i]     <= 'b0; 
+                rob_csr_rd_addr [i]     <= 'b0; 
+                rob_csr_w_en    [i]     <= 'b0; 
+                rob_csr_w_addr  [i]     <= 'b0; 
+                rob_csr_op      [i]     <= `CSR_OP_NOP; 
+                rob_csr_uimm    [i]     <= 'b0; 
+                rob_ebreak_ecall_mret[i]<= 3'b000;
+            end else if (rob_flush) begin
                 rob_pc          [i]     <= `PC_WIDTH'b0;
                 rob_dst_addr    [i]     <= 'b0;
                 rob_dst_wen     [i]     <= 'b0;
@@ -235,9 +249,11 @@ generate
         always @(posedge clk or negedge rst_n) begin
             if (!rst_n) begin
                 rob_branch_ready[i] <= 1'b0;
+            end else if (rob_flush) begin
+                rob_branch_ready[i] <= 1'b0;
             end else if (wb_br_finish && (wb_br_rob == i)) begin
                 rob_branch_ready[i] <= 1'b1; 
-            end else if ((rob_commit_Paddr == i) || rob_flush) begin
+            end else if (rob_commit_Paddr == i) begin
                 rob_branch_ready[i] <= 1'b0;
             end
         end
@@ -245,10 +261,13 @@ generate
             if (!rst_n) begin
                 rob_br_taken[i] <= 1'b0;
                 rob_br_addr [i] <= `PC_WIDTH'b0;
+            end else if (rob_flush) begin
+                rob_br_taken[i] <= 1'b0;
+                rob_br_addr[i]  <= `PC_WIDTH'b0;
             end else if (wb_br_finish && (wb_br_rob == i) && wb_br_taken) begin
                 rob_br_taken[i] <= 1'b1; 
                 rob_br_addr [i] <= wb_br_addr;
-            end else if ((rob_commit_Paddr == i) || rob_flush) begin
+            end else if (rob_commit_Paddr == i) begin
                 rob_br_taken[i] <= 1'b0;
                 rob_br_addr[i]  <= `PC_WIDTH'b0;
             end
@@ -256,14 +275,18 @@ generate
         always @(posedge clk or negedge rst_n) begin
             if (!rst_n) begin
                 rob_store_ready[i] <= 1'b0;
+            end else if (rob_flush) begin
+                rob_store_ready[i] <= 1'b0;
             end else if (store_finish && (wb_mem_dst_Paddr == i)) begin
                 rob_store_ready[i] <= 1'b1; 
-            end else if ((rob_commit_Paddr == i) || rob_flush) begin
+            end else if (rob_commit_Paddr == i) begin
                 rob_store_ready[i] <= 1'b0;
             end
         end
         always @(posedge clk or negedge rst_n) begin
             if (!rst_n) begin
+                rob_dst_value_ready[i]  <= 1'b0;
+            end else if (rob_flush) begin                                   // clear
                 rob_dst_value_ready[i]  <= 1'b0;
             end else if (wb_alu_valid && (wb_alu_dst_Paddr == i)) begin     // alu
                 rob_dst_value[i]        <= wb_alu_out;
@@ -280,7 +303,7 @@ generate
             end else if (wb_br_out_valid && (wb_br_rob == i)) begin         // jump
                 rob_dst_value[i]        <= wb_br_out;
                 rob_dst_value_ready[i]  <= 1'b1;
-            end else if ((rob_commit_Paddr == i) || rob_flush) begin        // clear
+            end else if (rob_commit_Paddr == i) begin                       // clear
                 rob_dst_value_ready[i]  <= 1'b0;
             end
         end
@@ -288,10 +311,12 @@ generate
             if (!rst_n) begin
                 rob_csr_rs1_data[i]     <=  `WORD_WIDTH'b0;
                 rob_csr_ready[i]        <=  1'b0;
+            end else if (rob_flush) begin
+                rob_csr_ready[i]        <=  1'b0;
             end else if (csr_rs1_data_valid && (csr_Pdst == i)) begin
                 rob_csr_rs1_data[i]     <=  csr_rs1_data;
                 rob_csr_ready[i]        <=  1'b1;
-            end else if ((rob_commit_Paddr == i) || rob_flush) begin
+            end else if (rob_commit_Paddr == i) begin
                 rob_csr_ready[i]        <=  1'b0;
             end
         end
@@ -331,12 +356,12 @@ always @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
         rs1_fromROB_valid <= 1'b0;
         rs1_value_fromROB <= `WORD_WIDTH'b0;
+    end  else if (rs1_rat_valid && rs1_wb_en) begin
+        rs1_fromROB_valid <= 1'b1;
+        rs1_value_fromROB <= rs1_wb_data;
     end else if (rs1_rat_valid && rob_dst_value_ready[rs1_Paddr]) begin
         rs1_fromROB_valid <= 1'b1;
         rs1_value_fromROB <= rob_dst_value[rs1_Paddr];
-    end else if (rs1_rat_valid && rs1_wb_en) begin
-        rs1_fromROB_valid <= 1'b1;
-        rs1_value_fromROB <= rs1_wb_data;
     end else begin
         rs1_fromROB_valid <= 1'b0;
     end
@@ -346,12 +371,12 @@ always @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
         rs2_fromROB_valid <= 1'b0;
         rs2_value_fromROB <= `WORD_WIDTH'b0;
-    end else if (rs2_rat_valid && rob_dst_value_ready[rs2_Paddr]) begin
-        rs2_fromROB_valid <= 1'b1;
-        rs2_value_fromROB <= rob_dst_value[rs2_Paddr];
     end else if (rs2_rat_valid && rs2_wb_en) begin
         rs2_fromROB_valid <= 1'b1;
         rs2_value_fromROB <= rs2_wb_data;
+    end  else if (rs2_rat_valid && rob_dst_value_ready[rs2_Paddr]) begin
+        rs2_fromROB_valid <= 1'b1;
+        rs2_value_fromROB <= rob_dst_value[rs2_Paddr];
     end else begin
         rs2_fromROB_valid <= 1'b0;
     end
@@ -363,13 +388,16 @@ generate
             if (!rst_n) begin
                 rob_exp_en[i] <= 1'b0;
                 rob_exp_op[i] <= `ISA_EXP_NO_EXP;
+            end else if (rob_flush) begin
+                rob_exp_en[i] <= 1'b0;
+                rob_exp_op[i] <= `ISA_EXP_NO_EXP;
             end else if ((exp_code_in_decoder != `ISA_EXP_NO_EXP) && allocate_en && !rob_flush && (alloc_rob==i)) begin
                 rob_exp_en[i] <= 1'b1;
                 rob_exp_op[i] <= exp_code_in_decoder;
-            end else if ((exp_code_in_decoder != `ISA_EXP_NO_EXP)&& !rob_flush && (wb_mem_dst_Paddr==i)) begin
+            end else if ((exp_code_in_mem_ctrl != `ISA_EXP_NO_EXP)&& !rob_flush && (wb_mem_dst_Paddr==i)) begin
                 rob_exp_en[i] <= 1'b1;
                 rob_exp_op[i] <= exp_code_in_mem_ctrl;
-            end else if ((rob_commit_Paddr == i) || rob_flush) begin
+            end else if (rob_commit_Paddr == i) begin
                 rob_exp_en[i] <= 1'b0;
                 rob_exp_op[i] <= `ISA_EXP_NO_EXP;
             end

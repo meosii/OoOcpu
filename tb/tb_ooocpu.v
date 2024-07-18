@@ -38,25 +38,16 @@ module tb_ooocpu();
     wire                        timer_int_clear;
 
 // insn memory
-wire [31:0] insn_pc [0:1023];
-reg [31:0] insn_pc_r1 [0:1023];
+reg [31:0] insn_pc_r1;
 reg [31:0] insn_memory [0:1023];
 
-genvar i;
-generate for(i=0; i<1023; i++)
-    begin: INSN_R
-        assign insn_pc[i] = insn_memory[i];
-
-        always @(posedge clk or negedge rst_n) begin
-            if (!rst_n) begin
-                insn_pc_r1[i] <= 32'b0;
-            end else begin
-                insn_pc_r1[i] <= insn_pc[i];
-            end
-        end
+always @(posedge clk or negedge rst_n) begin
+    if (!rst_n) begin
+        insn_pc_r1 <= 'b0;
+    end else if (rd_insn_en) begin
+        insn_pc_r1 <= insn_memory[pc[31:2]];
     end
-endgenerate
-
+end
 
 ooocpu u_ooocpu(
     .clk                (clk                ),
@@ -65,7 +56,7 @@ ooocpu u_ooocpu(
     .irq_external       (irq_external       ),
     .irq_timer          (irq_timer          ),
     .irq_software       (irq_software       ),
-    .insn               (insn_pc_r1[pc[31:2]]),
+    .insn               (insn_pc_r1         ),
     .rd_insn_en         (rd_insn_en         ),
     .pc                 (pc                 ),
     .CPU_HRDATA         (CPU_HRDATA         ),

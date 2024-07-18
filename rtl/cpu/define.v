@@ -388,7 +388,7 @@
 `define HWRITE_READ     1'b0
 
 // config by myself
-`define MTVEC_RESET_BASE        30'h1f00    //'d7936; itcm_addr = pc[:2] = BASE[XLEN-1:2]
+`define MTVEC_RESET_BASE        30'h200    //'d512; itcm_addr = pc[:2] = BASE[XLEN-1:2] = 'h200
 `define MTVEC_RESET_MODE        2'b0        //DIRECT: All exceptions set pc to BASE
 
 // bus addr

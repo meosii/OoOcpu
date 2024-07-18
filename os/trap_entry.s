@@ -2,9 +2,7 @@
     .align 2
     .global _start
 _start:
-
     addi sp, sp, -32*4
-
     sw x1, 1*4(sp)
     sw x2, 2*4(sp)
     sw x3, 3*4(sp)
@@ -30,15 +28,12 @@ _start:
     sw x23, 23*4(sp)
     sw x24, 24*4(sp)
     sw x25, 25*4(sp)
-#ifndef SIMULATION
     sw x26, 26*4(sp)
     sw x27, 27*4(sp)
-#endif
     sw x28, 28*4(sp)
     sw x29, 29*4(sp)
     sw x30, 30*4(sp)
     sw x31, 31*4(sp)
-
     csrr a0, mcause
     csrr a1, mepc
 test_if_asynchronous:
@@ -82,12 +77,8 @@ asynchronous_return:
     lw x29, 29*4(sp)
     lw x30, 30*4(sp)
     lw x31, 31*4(sp)
-
     addi sp, sp, 32*4
-
     mret
-
-
 .weak interrupt_handler
 interrupt_handler:
 1:

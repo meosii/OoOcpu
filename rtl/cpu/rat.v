@@ -9,8 +9,8 @@ module rat(
     input wire                              rst_n,
 
     // rs1 and rs2 read rat
-    input wire  [`GPR_ADDR_WIDTH-1 : 0]     id_rs1_addr, // gpr addr
-    input wire  [`GPR_ADDR_WIDTH-1 : 0]     id_rs2_addr, // gpr addr
+    input wire  [`GPR_ADDR_WIDTH-1 : 0]     rs1_addr, // gpr addr
+    input wire  [`GPR_ADDR_WIDTH-1 : 0]     rs2_addr, // gpr addr
     input wire  [`GPR_ADDR_WIDTH-1 : 0]     jp_rs1_addr,
     
     // from rob allocate
@@ -62,10 +62,10 @@ end
 endgenerate
 
 // read rs1 and rs2
-assign rs1_rat_valid    = (id_rs1_addr == 'b0)? 1'b0 : rat_valid[id_rs1_addr];
-assign rs1_Paddr        = (id_rs1_addr == 'b0)? 'b0 : rat_Paddr[id_rs1_addr];
-assign rs2_rat_valid    = (id_rs2_addr == 'b0)? 1'b0 : rat_valid[id_rs2_addr];
-assign rs2_Paddr        = (id_rs2_addr == 'b0)? 'b0 : rat_Paddr[id_rs2_addr];
+assign rs1_rat_valid    = (rs1_addr == 'b0)? 1'b0   : rat_valid[rs1_addr];
+assign rs1_Paddr        = (rs1_addr == 'b0)? 'b0    : rat_Paddr[rs1_addr];
+assign rs2_rat_valid    = (rs2_addr == 'b0)? 1'b0   : rat_valid[rs2_addr];
+assign rs2_Paddr        = (rs2_addr == 'b0)? 'b0    : rat_Paddr[rs2_addr];
 
 assign jp_rs1_rat_valid = (jp_rs1_addr == 'b0)? 1'b0 : rat_valid[jp_rs1_addr];
 

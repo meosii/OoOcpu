@@ -185,6 +185,5 @@ assign id_stall = rob_full || stall_in_issue || interrupt_happened_r;
 assign if_flush = jp_taken || rob_commit_br_taken || interrupt_happened;
 assign id_flush = rob_commit_br_taken || interrupt_happened;
 
-
 endmodule
 `endif
