@@ -153,7 +153,7 @@ always @(posedge clk or negedge rst_n) begin
     end
 end
 
-assign rob_flush        = rob_commit_br_taken || rob_commit_exp_en;
+assign rob_flush        = rob_commit_br_taken || rob_commit_exp_en || rob_commit_ebreak_ecall_mret[1] || rob_commit_ebreak_ecall_mret[2];
 assign alloc_rob        = wptr[$clog2(`ROB_DEPTH)-1 : 0];
 assign rob_commit_Paddr = rptr[$clog2(`ROB_DEPTH)-1 : 0];
 

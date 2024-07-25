@@ -219,33 +219,11 @@ assign ecall_en  = ((if_en) && (if_insn == `ECALL_INSN) )?  `ENABLE : `DISABLE;
 assign mret_en   = ((if_en) && (if_insn == `MRET_INSN))?  `ENABLE : `DISABLE;
 
 assign exp_code = (!if_en)? `ISA_EXP_NO_EXP :
-                (((opcode == `OP_IMM) && (  (if_insn[`I_TYPE_FUNCT3] == `FUNCT3_ADDI    ) ||
-                                            (if_insn[`I_TYPE_FUNCT3] == `FUNCT3_SLTI    ) ||
-                                            (if_insn[`I_TYPE_FUNCT3] == `FUNCT3_SLTIU   ) ||
-                                            (if_insn[`I_TYPE_FUNCT3] == `FUNCT3_ANDI    ) ||
-                                            (if_insn[`I_TYPE_FUNCT3] == `FUNCT3_ORI     ) ||
-                                            (if_insn[`I_TYPE_FUNCT3] == `FUNCT3_XORI    ) ||
-                                            (if_insn[`I_TYPE_FUNCT3] == `FUNCT3_SLLI    ) ||
-                                            ((if_insn[`I_TYPE_FUNCT3] == `FUNCT3_SRLI_SRAI) && ((if_insn[`I_TYPE_IMM_11_5] == 7'b0000000) || (if_insn[`I_TYPE_IMM_11_5] == 7'b0100000)))))
-                ||  ((opcode == `OP) && (if_insn[`R_TYPE_FUNCT7] == 7'b0000000) && ((if_insn[`R_TYPE_FUNCT3] == `FUNCT3_ADD  ) ||
-                                                                                   (if_insn[`R_TYPE_FUNCT3] == `FUNCT3_SLT  ) ||
-                                                                                   (if_insn[`R_TYPE_FUNCT3] == `FUNCT3_SLTU ) ||
-                                                                                   (if_insn[`R_TYPE_FUNCT3] == `FUNCT3_AND  ) ||
-                                                                                   (if_insn[`R_TYPE_FUNCT3] == `FUNCT3_OR   ) ||
-                                                                                   (if_insn[`R_TYPE_FUNCT3] == `FUNCT3_XOR  ) ||
-                                                                                   (if_insn[`R_TYPE_FUNCT3] == `FUNCT3_SLL  ) ||
-                                                                                   (if_insn[`R_TYPE_FUNCT3] == `FUNCT3_SRL  ))      )
-                ||  ((opcode == `OP) && (if_insn[`R_TYPE_FUNCT7] == 7'b0100000) && ((if_insn[`R_TYPE_FUNCT3] == `FUNCT3_SUB) ||
-                                                                                    (if_insn[`R_TYPE_FUNCT3] == `FUNCT3_SRA))       )
-                ||  ((opcode == `OP) && (if_insn[`R_TYPE_FUNCT7] == `FUNCT7_MULDIV))
-                ||  (opcode == `OP_LUI      )
-                ||  (opcode == `OP_AUIPC    )
-                ||  (opcode == `OP_JAL      )
-                ||  (opcode == `OP_JALR     )
-                ||  (opcode == `OP_BRANCH   )
-                ||  (opcode == `OP_LOAD     )
-                ||  (opcode == `OP_STORE    )
-                ||  (opcode == `OP_SYSTEM   ))? `ISA_EXP_NO_EXP : `ISA_EXP_UNDEF_INSN;
+                (   (alu_op != `ALU_OP_NOP  )
+                ||  (br_op  != `BR_OP_NOP   )
+                ||  (mem_op != `MEM_OP_NOP  )
+                ||  (csr_op != `CSR_OP_NOP  )
+                ||  ebreak_en || ecall_en || mret_en)? `ISA_EXP_NO_EXP :   `ISA_EXP_UNDEF_INSN;
 
 // jump and branch
 

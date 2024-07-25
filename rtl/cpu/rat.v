@@ -27,6 +27,7 @@ module rat(
     input wire                              rob_commit_br_taken,   // refresh the rat
     // exception
     input wire                              rob_commit_exp_en,
+    input wire [2:0]                        rob_commit_ebreak_ecall_mret,
 
     // output to issue_queue
     // rs1 and rs2
@@ -47,7 +48,7 @@ generate for (i=0; i<32; i++) begin: GENERATE_RAT
         if (!rst_n) begin
             rat_Paddr[i] <= 'b0;
             rat_valid[i] <= 1'b0;
-        end else if (rob_commit_br_taken || rob_commit_exp_en) begin
+        end else if (rob_commit_br_taken || rob_commit_exp_en || rob_commit_ebreak_ecall_mret[1] || rob_commit_ebreak_ecall_mret[2]) begin
             rat_Paddr[i] <= 'b0;
             rat_valid[i] <= 1'b0;
         end else if (allocate_en && (rob_alloc_dst_addr_2rat==i) && rob_alloc_dst_wen_2rat) begin

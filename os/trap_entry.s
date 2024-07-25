@@ -139,4 +139,4 @@ exception_handler:
     sw x14, 0(x8)
     sw x15, 0(x9)
     csrw mepc, a1
-    j asynchronous_return
+    j asynchronous_retur

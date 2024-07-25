@@ -182,8 +182,8 @@ assign pc_stall = rob_full || stall_in_issue || stall_in_decoder || (interrupt_h
 assign if_stall = rob_full || stall_in_issue || stall_in_decoder || interrupt_happened_r;
 assign id_stall = rob_full || stall_in_issue || interrupt_happened_r;
 
-assign if_flush = jp_taken || rob_commit_br_taken || interrupt_happened;
-assign id_flush = rob_commit_br_taken || interrupt_happened;
+assign if_flush = jp_taken || rob_commit_br_taken || exception_en || interrupt_happened;
+assign id_flush = rob_commit_br_taken || exception_en || interrupt_happened;
 
 endmodule
 `endif

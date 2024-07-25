@@ -1,3 +1,4 @@
+`timescale 1ps/1ps
 module tb_ooocpu();
     reg                         clk;
     reg                         rst_n;
@@ -94,7 +95,7 @@ spm u_spm(
     .spm_rd_data        (spm_rd_data        )
 );
 
-always #5 clk = ~clk;
+always #10 clk = ~clk;
 
 initial begin
     #0 begin
@@ -108,7 +109,15 @@ initial begin
     #3 begin
         rst_n = 1;
     end
-    #1000 $finish;
+//    #220 begin
+//        irq_timer = 1;
+//    end
+//    @(timer_int_clear)
+//    #1 begin
+//        irq_timer = 0;
+//    end
+    #3000 
+    $finish();
 end
 
 

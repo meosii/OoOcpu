@@ -162,7 +162,7 @@ assign rd_insn_en = (cpu_en)? 1'b1:1'b0;
     wire [`WORD_WIDTH - 1 : 0]          rob_commit_csr_rs1_data;
     wire [`WORD_WIDTH - 1 : 0]          commit_csr_w_data;
     wire [`PC_WIDTH-1 : 0]              rob_commit_pc;
-    reg [2:0]                           rob_commit_ebreak_ecall_mret;
+    wire [2:0]                          rob_commit_ebreak_ecall_mret;
     // to id_wire to issue queue
     wire [$clog2(`ROB_DEPTH)-1 : 0]     alloc_rob;                  // wptr; Paddr
     wire                                rob_full;
@@ -384,26 +384,27 @@ rob u_rob(
 );
 
 rat u_rat(
-    .clk                        (clk                        ),
-    .rst_n                      (rst_n                      ),
-    .rs1_addr                   (rs1_addr                   ),
-    .rs2_addr                   (rs2_addr                   ),
-    .jp_rs1_addr                (jp_rs1_addr                ),
-    .allocate_en                (allocate_en                ),
-    .rob_alloc_tag_2rat         (rob_alloc_tag_2rat         ),
-    .rob_alloc_dst_addr_2rat    (rob_alloc_dst_addr_2rat    ),
-    .rob_alloc_dst_wen_2rat     (rob_alloc_dst_wen_2rat     ), 
-    .commit_dst_en              (commit_dst_en              ),
-    .rob_commit_dst_addr_2rat   (rob_commit_dst_addr_2rat   ),
-    .rob_commit_Paddr           (rob_commit_Paddr           ),
-    .rob_commit_br_taken        (rob_commit_br_taken        ),
-    .rob_commit_exp_en          (rob_commit_exp_en          ),
+    .clk                            (clk                            ),
+    .rst_n                          (rst_n                          ),
+    .rs1_addr                       (rs1_addr                       ),
+    .rs2_addr                       (rs2_addr                       ),
+    .jp_rs1_addr                    (jp_rs1_addr                    ),
+    .allocate_en                    (allocate_en                    ),
+    .rob_alloc_tag_2rat             (rob_alloc_tag_2rat             ),
+    .rob_alloc_dst_addr_2rat        (rob_alloc_dst_addr_2rat        ),
+    .rob_alloc_dst_wen_2rat         (rob_alloc_dst_wen_2rat         ), 
+    .commit_dst_en                  (commit_dst_en                  ),
+    .rob_commit_dst_addr_2rat       (rob_commit_dst_addr_2rat       ),
+    .rob_commit_Paddr               (rob_commit_Paddr               ),
+    .rob_commit_br_taken            (rob_commit_br_taken            ),
+    .rob_commit_exp_en              (rob_commit_exp_en              ),
+    .rob_commit_ebreak_ecall_mret   (rob_commit_ebreak_ecall_mret   ),
     // output to issue_queue
-    .rs1_rat_valid              (rs1_rat_valid              ),
-    .rs1_Paddr                  (rs1_Paddr                  ),
-    .rs2_rat_valid              (rs2_rat_valid              ),
-    .rs2_Paddr                  (rs2_Paddr                  ),
-    .jp_rs1_rat_valid           (jp_rs1_rat_valid           )
+    .rs1_rat_valid                  (rs1_rat_valid                  ),
+    .rs1_Paddr                      (rs1_Paddr                      ),
+    .rs2_rat_valid                  (rs2_rat_valid                  ),
+    .rs2_Paddr                      (rs2_Paddr                      ),
+    .jp_rs1_rat_valid               (jp_rs1_rat_valid               )
 );
 
 gpr u_gpr(

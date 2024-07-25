@@ -1,4 +1,4 @@
-test_name = trap_entry
+test_name = ecall
 as:
 	riscv32-unknown-elf-c++ -nostdlib -nostdinc -static -g -Ttext 0x80000000 $(test_name).s -o $(test_name).elf -march=rv32im -mabi=ilp32
 objdump:
